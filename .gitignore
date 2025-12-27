@@ -1,0 +1,4 @@
+
+# secrets
+apps/admin/app/helper/key_file/
+**/*firebase-adminsdk*.json
