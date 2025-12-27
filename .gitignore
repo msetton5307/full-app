@@ -6,3 +6,4 @@ apps/admin/app/helper/key_file/*.json
 *.serviceAccount.json
 apps/admin/app/helper/key_file/*.json
 *.serviceAccount.json
+.DS_Store
