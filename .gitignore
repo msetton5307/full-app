@@ -1,4 +1,8 @@
 
 # secrets
-apps/admin/app/helper/key_file/
+apps/admin/app/helper/key_file/sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json
 **/*firebase-adminsdk*.json
+apps/admin/app/helper/key_file/*.json
+*.serviceAccount.json
+apps/admin/app/helper/key_file/*.json
+*.serviceAccount.json
