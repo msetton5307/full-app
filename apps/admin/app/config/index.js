@@ -6,9 +6,15 @@ module.exports = {
         isProd:(process.env.NODE_ENV === 'prod'),
         getAdminFolderName: process.env.ADMIN_FOLDER_NAME || 'admin',
         getApiFolderName: process.env.API_FOLDER_NAME || 'api',
-		project_name: "Sysaving",
-		project_description: "Basic Setup"
-	},
+                project_name: "Sysaving",
+                project_description: "Basic Setup"
+        },
+        ngrok: {
+                enabled: process.env.NGROK_ENABLED === 'true',
+                authToken: process.env.NGROK_AUTHTOKEN || '',
+                domain: process.env.NGROK_DOMAIN || '',
+                region: process.env.NGROK_REGION || ''
+        },
         db: {
                 port: process.env.DB_PORT || 27017,
                 database: process.env.DB_DATABASE || 'sysaving',

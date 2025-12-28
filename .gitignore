@@ -7,3 +7,4 @@ apps/admin/app/helper/key_file/*.json
 apps/admin/app/helper/key_file/*.json
 *.serviceAccount.json
 .DS_Store
+node_modules/
