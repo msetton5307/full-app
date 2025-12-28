@@ -5,7 +5,42 @@ let firebase_admin = require('firebase-admin');
 const defaultServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-aeb337580e7d.json');
 const legacyServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json');
 
+const normalizePrivateKey = (rawKey) => {
+    if (!rawKey) return rawKey;
+
+    const unquotedKey = rawKey.replace(/^"|"$/g, '');
+    return unquotedKey.replace(/\\n/g, '\n');
+};
+
+const parseServiceAccountFromJsonEnv = () => {
+    const rawJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (!rawJson) return null;
+
+    const tryParse = (value) => {
+        const parsed = JSON.parse(value);
+        if (parsed?.private_key) {
+            parsed.private_key = normalizePrivateKey(parsed.private_key);
+        }
+        return parsed;
+    };
+
+    try {
+        return tryParse(rawJson);
+    } catch (_) {
+        try {
+            const decodedJson = Buffer.from(rawJson, 'base64').toString('utf8');
+            return tryParse(decodedJson);
+        } catch (error) {
+            console.error('[NotificationHelper] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON env var:', error);
+            return null;
+        }
+    }
+};
+
 const resolveServiceAccount = () => {
+    const envJsonAccount = parseServiceAccountFromJsonEnv();
+    if (envJsonAccount) return envJsonAccount;
+
     const envPrivateKey = process.env.FIREBASE_PRIVATE_KEY;
     const envClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const envProjectId = process.env.FIREBASE_PROJECT_ID;
@@ -16,7 +51,7 @@ const resolveServiceAccount = () => {
             type: 'service_account',
             project_id: envProjectId,
             private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || undefined,
-            private_key: envPrivateKey.replace(/\\n/g, '\n'),
+            private_key: normalizePrivateKey(envPrivateKey),
             client_email: envClientEmail,
             client_id: process.env.FIREBASE_CLIENT_ID || undefined,
             auth_uri: 'https://accounts.google.com/o/oauth2/auth',
@@ -43,7 +78,7 @@ const resolveServiceAccount = () => {
         if (fileAccount?.private_key) {
             return {
                 ...fileAccount,
-                private_key: fileAccount.private_key.replace(/\\n/g, '\n')
+                private_key: normalizePrivateKey(fileAccount.private_key)
             };
         }
     }
@@ -53,11 +88,18 @@ const resolveServiceAccount = () => {
 
 const serviceAccount = resolveServiceAccount();
 
+let messagingClient = null;
+
 if (serviceAccount) {
     // Initialize the app with a service account, granting admin privileges
-    firebase_admin.initializeApp({
-        credential: firebase_admin.credential.cert(serviceAccount)
-    });
+    try {
+        firebase_admin.initializeApp({
+            credential: firebase_admin.credential.cert(serviceAccount)
+        });
+        messagingClient = firebase_admin.messaging();
+    } catch (error) {
+        console.error('[NotificationHelper] Failed to initialize Firebase Admin SDK; push notifications are disabled.', error);
+    }
 } else {
     console.warn('[NotificationHelper] Firebase credentials are missing; push notifications are disabled.');
 }
@@ -66,10 +108,15 @@ class NotificationHelper {
     constructor() { }
 
     async pushNotification(message) {
+        if (!messagingClient) {
+            console.warn('[NotificationHelper.pushNotification] Messaging client is not initialized; skipping push.');
+            return false;
+        }
+
         try {
             // FCM Send notification
             console.log('[NotificationHelper.pushNotification] Request payload:', JSON.stringify(message, null, 2));
-            const response = await firebase_admin.messaging().send(message);
+            const response = await messagingClient.send(message);
             console.log('[NotificationHelper.pushNotification] FCM response:', response);
             return true;
         } catch (error) {
