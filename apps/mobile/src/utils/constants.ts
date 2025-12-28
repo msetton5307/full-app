@@ -1,6 +1,6 @@
 import { BASE_URL } from '@env';
 
-export const DEFAULT_API_BASE_URL = 'https://671e0ecb5f6b.ngrok-free.app';
+export const DEFAULT_API_BASE_URL = 'http://localhost:1111';
 export const DEFAULT_DEALS_BASE_URL = 'https://api.sysavings.com';
 
 export const API_BASE_URL = BASE_URL || DEFAULT_API_BASE_URL;
