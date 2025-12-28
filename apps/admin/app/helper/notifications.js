@@ -4,6 +4,7 @@ let firebase_admin = require('firebase-admin');
 
 const defaultServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-aeb337580e7d.json');
 const legacyServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json');
+const oauthPlistPath = process.env.FIREBASE_OAUTH_PLIST_PATH;
 
 const normalizePrivateKey = (rawKey) => {
     if (!rawKey) return rawKey;
@@ -22,6 +23,39 @@ const decodeBase64PrivateKey = (rawKey) => {
         console.error('[NotificationHelper] Failed to decode FIREBASE_PRIVATE_KEY_BASE64 env var:', error);
         return null;
     }
+};
+
+const parsePlistClientId = (plistPath) => {
+    if (!plistPath) return null;
+
+    try {
+        const contents = fs.readFileSync(plistPath, 'utf8');
+        const clientIdMatch = contents.match(/<key>CLIENT_ID<\/key>\s*<string>([^<]+)<\/string>/i);
+        if (clientIdMatch?.[1]) {
+            return clientIdMatch[1].trim();
+        }
+    } catch (error) {
+        console.error('[NotificationHelper] Failed to read OAuth plist credentials:', error);
+    }
+
+    return null;
+};
+
+const resolveOAuthRefreshTokenCredential = () => {
+    const refreshToken = process.env.FIREBASE_OAUTH_REFRESH_TOKEN;
+    const clientSecret = process.env.FIREBASE_OAUTH_CLIENT_SECRET;
+    const clientId = process.env.FIREBASE_OAUTH_CLIENT_ID || parsePlistClientId(oauthPlistPath);
+
+    if (!refreshToken || !clientSecret || !clientId) {
+        return null;
+    }
+
+    return {
+        type: 'authorized_user',
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken
+    };
 };
 
 const parseServiceAccountFromJsonEnv = () => {
@@ -102,21 +136,34 @@ const resolveServiceAccount = () => {
 };
 
 const serviceAccount = resolveServiceAccount();
+const oauthCredential = resolveOAuthRefreshTokenCredential();
 
 let messagingClient = null;
 
-if (serviceAccount) {
-    // Initialize the app with a service account, granting admin privileges
-    try {
+try {
+    if (serviceAccount) {
         firebase_admin.initializeApp({
             credential: firebase_admin.credential.cert(serviceAccount)
         });
         messagingClient = firebase_admin.messaging();
-    } catch (error) {
-        console.error('[NotificationHelper] Failed to initialize Firebase Admin SDK; push notifications are disabled.', error);
+        console.info('[NotificationHelper] Firebase Admin initialized with service account credentials.');
+    } else if (oauthCredential) {
+        firebase_admin.initializeApp({
+            credential: firebase_admin.credential.refreshToken(oauthCredential)
+        });
+        messagingClient = firebase_admin.messaging();
+        console.info('[NotificationHelper] Firebase Admin initialized with OAuth refresh token credentials.');
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        firebase_admin.initializeApp({
+            credential: firebase_admin.credential.applicationDefault()
+        });
+        messagingClient = firebase_admin.messaging();
+        console.info('[NotificationHelper] Firebase Admin initialized with application default credentials.');
+    } else {
+        console.warn('[NotificationHelper] Firebase credentials are missing; push notifications are disabled.');
     }
-} else {
-    console.warn('[NotificationHelper] Firebase credentials are missing; push notifications are disabled.');
+} catch (error) {
+    console.error('[NotificationHelper] Failed to initialize Firebase Admin SDK; push notifications are disabled.', error);
 }
 
 class NotificationHelper {
