@@ -1,0 +1,115 @@
+<div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
+    <div class="navbar-header">
+        <ul class="nav navbar-nav flex-row">
+            <li class="nav-item me-auto">
+                <a class="navbar-brand" href="<%= generateUrl('user.dashboard') %>">
+                    <span class="brand-logo">
+                        <!-- <img src="/images/express-basic-setup.png" style="max-width: 150px; max-height: 75px; background-color: rgb(148, 148, 148);"  alt="logo"> -->
+                    <!-- </span> -->
+                    <h2 class="brand-text">
+                        <%= project_name %>
+                    </h2>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- <div class="shadow-bottom"></div> -->
+    <br><br>
+    <div class="main-menu-content">
+        <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+            <li class="<%=(page_name == 'user-dashboard') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('user.dashboard') %>">
+                    <i data-feather="home"></i>
+                    <span class="menu-title text-truncate" data-i18n="Dashboard">Dashboard</span>
+                </a>
+            </li>
+
+           
+
+            <li class=" navigation-header"><span data-i18n="Apps &amp; Pages">Apps &amp; Pages</span><i
+                    data-feather="more-horizontal"></i></li>
+
+            <!-- <li class="<%=(page_name == 'user-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.user.listing') %>">
+                    <i data-feather="user"></i>
+                    <span class="menu-item text-truncate" data-i18n="Users">User Management</span>
+                </a>
+            </li> -->
+
+           
+            <li class="<%=(page_name == 'cms-management')||(page_name == 'contact-us-management')||(page_name == 'faq-management')||(page_name == 'landing-page-cms-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center">
+                    <i data-feather='sidebar'></i>
+                    <span class="menu-title text-truncate" data-i18n="User">CMS Management</span>
+                </a>
+                <ul class="menu-content">
+                    <li class="<%=(page_name == 'cms-management') ? 'active' : ''%>">
+                        <a class="d-flex align-items-center" href="<%= generateUrl('admin.cms.list') %>">
+                            <i data-feather="circle"></i>
+                            <span class="menu-item text-truncate" data-i18n="General CMS">General</span>
+                        </a>
+                    </li>
+                
+                    <li class="<%=(page_name == 'faq-management') ? 'active' : ''%> nav-item">
+                        <a class="d-flex align-items-center" href="<%= generateUrl('admin.faq.listing') %>">
+                            <i data-feather='help-circle'></i>
+                            <span class="menu-title text-truncate" data-i18n="FAQ">FAQ</span>
+                        </a>
+                    </li>
+                   
+                </ul>
+            </li>
+            <li class="<%=(page_name == 'category-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.category.listing') %>">
+                    <i data-feather="bar-chart"></i>
+                    <span class="menu-item text-truncate" data-i18n="Category Management">Category Management</span>
+                </a>
+            </li>
+
+            <li class="<%=(page_name == 'deal-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.deal.listing') %>">
+                    <i data-feather="briefcase"></i>
+                    <span class="menu-item text-truncate" data-i18n="Deal Form">Deal Management</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'post-deal') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('deal.post.form') %>">
+                    <i data-feather="external-link"></i>
+                    <span class="menu-item text-truncate" data-i18n="Post Deal">Post Deal</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'keyword-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.keyword.listing') %>">
+                    <i data-feather="key"></i>
+                    <span class="menu-item text-truncate" data-i18n="Keyword">Keyword Management</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'payment-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.payment.listing') %>">
+                    <i data-feather="dollar-sign"></i>
+                    <span class="menu-item text-truncate" data-i18n="Payment">Payment Management</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'notification-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.notification.compose') %>">
+                    <i data-feather="bell"></i>
+                    <span class="menu-item text-truncate" data-i18n="Notifications">Notifications</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'transaction-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.transaction.listing') %>">
+                    <i data-feather="dollar-sign"></i>
+                    <span class="menu-item text-truncate" data-i18n="Payment">Transaction</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'settings-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('settings.edit') %>">
+                    <i data-feather="settings"></i>
+                    <span class="menu-item text-truncate" data-i18n="Settings">Settings</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</div>

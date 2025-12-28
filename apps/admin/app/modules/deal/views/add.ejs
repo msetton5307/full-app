@@ -1,0 +1,235 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Deal Add</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('admin.deal.listing')%>">Deals</a>
+                                </li>
+                                <li class="breadcrumb-item active"> <%= page_title %>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                  
+
+                    <div class="card">
+                        <!-- <div class="card-header border-bottom">
+                            <h4 class="card-title"></h4>
+                        </div> -->
+
+
+                        <div class="card-body py-2">
+                            <!-- form -->
+                            <form class="add-new-deal modal-content pt-0" id="add-new-deal" action="<%= generateUrl('deal.insert') %>" method="POST" enctype='multipart/form-data'>
+                              
+                                <div class="modal-header mb-1">
+                                    <h5 class="modal-title" id="exampleModalLabel">Add Deal Form</h5>
+                                </div>
+                                <div class="modal-body flex-grow-1">
+                                    
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <label class="form-label" for="basic-icon-default-deal-title">Deal Title</label><span
+                                            style="color: red;">*</span>
+                                            <input type="text" class="form-control dt-deal-title" id="deal_title" placeholder="Deal Title" name="deal_title" />
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <label class="form-label" for="basic-icon-default-deal-price">Deal Price</label><span
+                                            style="color: red;">*</span>
+                                            <input autocomplete="off" type="text" id="basic-icon-default-deal-price" class="form-control dt-deal-price" placeholder="Price" name="deal_price" />
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="category-dropdown col-lg-6">
+                                            <label class="form-label asterisk" for="categoryId">Select
+                                                Category</label>
+                                            <span style="color: red;">*</span>
+                                            <select name="categoryId" id="categoryId" class="form-control required">
+                                                <option value="" selected disabled>Select Category</option>
+                                                <% category.map(e=> { %>
+                                                    <option value="<%= e._id %>">
+                                                        <%= e.title %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <label class="form-label" for="basic-icon-default-deal-price">Discount</label><span
+                                            style="color: red;">*</span>
+                                            <input autocomplete="off" type="text" id="basic-icon-default-deal-price" class="form-control dt-discount" placeholder="Discount" name="discount" />
+                                        </div>
+                                        
+                                    </div>
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-lg-6" style="padding-top: 30px;">
+                                            <label for="isFeature" class="form-check-label">Is Feature:</label>
+                                            <input type="checkbox" id="isFeature" name="isFeature" value="true" class="form-check-input">
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <label for="brand" class="form-label">Select Brand</label>
+                                            <select id="brand_logo" name="brand_logo" class="form-control">
+                                                <option value="" selected disabled>Select Brand</option>
+                                                <option value="amazon.png">Amazon</option>
+                                                <option value="flipkart.png">Flipkart</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label class="form-label" for="basic-icon-default-deal-price">Product Link</label><span
+                                            style="color: red;">*</span>
+                                            <input autocomplete="off" type="text" id="product_link" class="form-control dt-deal-price" placeholder="Product Link" name="product_link" />
+                                        </div>
+                                    </div>
+                                    <br>
+                                
+                                   
+                                  
+                                  <div class="row">
+                                    <div class="col-lg-12">
+                                        <label class="form-label" for="basic-icon-default-goverment_id">Description</label>
+                                        <textarea name="description" id="description" class="form-control" cols="10" rows="5"></textarea>
+                                    </div>
+                                  </div>
+                                  <br>
+
+                                
+                                 <div class="row">
+                                    <input type="file" name="deal_images" id="deal_images" multiple>
+                                </div>
+                                 <br>
+
+                                 <!-- <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="isFeature" id="isFeature">
+                                    <label class="form-check-label" for="isFeature">Is Featured</label>
+                                </div> -->
+                                 <br>
+
+                                    <div class="d-flex">
+                                        <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
+                                        <!-- <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button> -->
+                                        <a class="btn btn-outline-secondary"  href="<%= generateUrl('admin.deal.listing')%>">Cancel</a>
+                                    </div>
+
+                                </div>
+                            </form>
+                               
+                            <!--/ form -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+</div>
+
+<!-- <script>
+   let userUploadImg = $('#user-upload-img'),
+        userUploadBtn = $('#user-upload'),
+        userUserImage = $('.uploadedAvatarUser'),
+        userResetBtn = $('#user-reset');
+        if (userUserImage) {
+
+        let resetImage = userUserImage.attr('src');
+        userUploadBtn.on('change', function (e) {
+            let reader = new FileReader(),
+                files = e.target.files;
+            reader.onload = function () {
+                if (userUploadImg) {
+                    userUploadImg.attr('src', reader.result);
+                }
+            };
+            reader.readAsDataURL(files[0]);
+            userResetBtn.removeClass("d-none");
+        });
+
+        userResetBtn.on('click', function () {
+            userUserImage.attr('src', resetImage);
+            $('#user-upload').val('');
+            userResetBtn.addClass("d-none");
+            return false;
+        });
+    }
+  </script> -->
+  <script>
+    document.getElementById('categoryId').addEventListener('change', function () {
+        const categoryId = this.value; // Get the selected category ID
+        const subCategoryDropdown = document.getElementById('subCategoryId'); // Sub-category dropdown element
+
+        // Reset sub-category dropdown to default state
+        subCategoryDropdown.innerHTML = '<option value="" disabled selected>Select Sub-Category</option>';
+
+        if (categoryId) {
+            // Fetch sub-categories for the selected category
+            fetch(`/deal/category/${categoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(subcategories => {
+                    // Populate the sub-category dropdown with fetched data
+                    subcategories.forEach(subcategory => {
+                        const option = document.createElement('option');
+                        option.value = subcategory._id; // Sub-category ID
+                        option.textContent = subcategory.title; // Sub-category name
+                        subCategoryDropdown.appendChild(option); // Append option to dropdown
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching subcategories:', error);
+                    alert('Failed to load subcategories. Please try again.');
+                });
+        }
+    });
+</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the date input field
+            var dobInput = document.getElementById('basic-icon-default-dob');
+
+            // Calculate the minimum date allowed (18 years ago from current date)
+            var currentDate = new Date();
+            var minDate = new Date(currentDate.getFullYear() - 18, currentDate.getMonth(), currentDate.getDate());
+
+            // Format the minimum date as a string
+            var minDateString = minDate.toISOString().split('T')[0];
+
+            // Set the minimum allowed date for the input field
+            dobInput.setAttribute('max', minDateString);
+        });
+    </script>
+
+<script>
+    $("#basic-icon-default-dob").keydown((e)=>{
+        e.preventDefault();
+    })
+</script>
+

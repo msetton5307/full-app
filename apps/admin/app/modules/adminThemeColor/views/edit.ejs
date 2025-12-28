@@ -1,0 +1,157 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0"><%= page_title %></h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item active"> <%= page_title %>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- <div class="card-header border-bottom">
+                            <h4 class="card-title">Admin Color Schema</h4>
+                        </div> -->
+                        <div class="card-body py-2">
+                            <!-- form -->
+                            <form class="validate-form" id="admin_color_schema_form" action="<%= generateUrl("adminThemeColor.update") %>" method="POST" enctype='application/x-www-form-urlencoded'>
+                                <div class="text-center mb-2">
+                                    <h3 class="mb-1">Admin Light Mode</h3>
+                                    <p>Change admin panel color schema for light mode.</p>
+                                    <p><i><small>Choose Light Mode to find the immediate change</small></i></p>
+                                </div>
+                                <div class="row mb-4 border-bottom">
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputBgColorLight">Background Color</label>
+                                        <input type="color" class="form-control" name="bgColorLight" id="inputBgColorLight" value="#f8f8f8">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputCardColorLight">Card Color</label>
+                                        <input type="color" class="form-control" name="cardColorLight" id="inputCardColorLight" value="#ffffff">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputCardColorLight">Card Muted Text Color</label>
+                                        <input type="color" class="form-control" name="cardMutedTextColorLight" id="inputCardMutedTextColorLight" value="#b9b9c3">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuBgColorLight">Menu Background Color</label>
+                                        <input type="color" class="form-control" name="menuBgColorLight" id="inputMenuBgColorLight" value="#ffffff">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuBrandTextColorLight">Menu Brand Text Color</label>
+                                        <input type="color" class="form-control" name="menuBrandTextColorLight" id="inputMenuBrandTextColorLight" value="#7367f0">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuIconColorLight">Menu Icons Color</label>
+                                        <input type="color" class="form-control" name="menuIconColorLight" id="inputMenuIconColorLight" value="#6e6b7b">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuHeaderTextColorLight">Menu Header Text Color</label>
+                                        <input type="color" class="form-control" name="menuHeaderTextColorLight" id="inputMenuHeaderTextColorLight" value="#a6a4b0">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputContentHeaderTextColorLight">Content Header Text Color</label>
+                                        <input type="color" class="form-control" name="contentHeaderTextColorLight" id="inputContentHeaderTextColorLight" value="#636363">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputFormLabelTextColorLight">Form Label Text Color</label>
+                                        <input type="color" class="form-control" name="formLabelTextColorLight" id="inputFormLabelTextColorLight" value="#5e5873">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputAnchorTextColorLight">Anchor Text Color</label>
+                                        <input type="color" class="form-control" name="anchorTextColorLight" id="inputAnchorTextColorLight" value="#7367f0">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputHeaderTagTextColorLight">H1 to H6 Tag Text Color</label>
+                                        <input type="color" class="form-control" name="headerTagTextColorLight" id="inputHeaderTagTextColorLight" value="#5e5873">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputBodyTextColorLight">Body Text Color</label>
+                                        <input type="color" class="form-control" name="bodyTextColorLight" id="inputBodyTextColorLight" value="#6e6b7b">
+                                    </div>
+                                </div>
+                                <div class="text-center mb-2">
+                                    <h3 class="mb-1">Admin Dark Mode</h3>
+                                    <p>Change admin panel color schema for dark mode.</p>
+                                    <p><i><small>Choose Dark Mode to find the immediate change</small></i></p>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputBgColorDark">Background Color</label>
+                                        <input type="color" class="form-control" name="bgColorDark" id="inputBgColorDark" value="#161d31">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputCardColorDark">Card Color</label>
+                                        <input type="color" class="form-control" name="cardColorDark" id="inputCardColorDark" value="#283046">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputCardColorDark">Card Muted Text Color</label>
+                                        <input type="color" class="form-control" name="cardMutedTextColorDark" id="inputCardMutedTextColorDark" value="#676d7d">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuBgColorDark">Menu Background Color</label>
+                                        <input type="color" class="form-control" name="menuBgColorDark" id="inputMenuBgColorDark" value="#283046">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuBrandTextColorDark">Menu Brand Text Color</label>
+                                        <input type="color" class="form-control" name="menuBrandTextColorDark" id="inputMenuBrandTextColorDark" value="#7367f0">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuIconColorDark">Menu Icons Color</label>
+                                        <input type="color" class="form-control" name="menuIconColorDark" id="inputMenuIconColorDark" value="#d0d2d6">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputMenuHeaderTextColorDark">Menu Header Text Color</label>
+                                        <input type="color" class="form-control" name="menuHeaderTextColorDark" id="inputMenuHeaderTextColorDark" value="#676d7d">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputContentHeaderTextColorDark">Content Header Text Color</label>
+                                        <input type="color" class="form-control" name="contentHeaderTextColorDark" id="inputContentHeaderTextColorDark" value="#d0d2d6">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputFormLabelTextColorDark">Form Label Text Color</label>
+                                        <input type="color" class="form-control" name="formLabelTextColorDark" id="inputFormLabelTextColorDark" value="#d0d2d6">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputAnchorTextColorDark">Anchor Text Color</label>
+                                        <input type="color" class="form-control" name="anchorTextColorDark" id="inputAnchorTextColorDark" value="#7367f0">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputHeaderTagTextColorDark">H1 to H6 Tag Text Color</label>
+                                        <input type="color" class="form-control" name="headerTagTextColorDark" id="inputHeaderTagTextColorDark" value="#d0d2d6">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="inputBodyTextColorDark">Body Text Color</label>
+                                        <input type="color" class="form-control" name="bodyTextColorDark" id="inputBodyTextColorDark" value="#b4b7bd">
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary mt-1 me-1">Save changes</button>
+                                        <button type="reset" class="btn btn-outline-secondary mt-1">Discard</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <!--/ form -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>

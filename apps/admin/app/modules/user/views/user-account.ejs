@@ -1,0 +1,57 @@
+<% layout(module_directory+'/user/views/user-details') -%>
+<!-- User Content -->
+<div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
+    <!-- User Pills -->
+    <ul class="nav nav-pills mb-2">
+        <li class="nav-item">
+            <a class="nav-link active" href="<%= generateUrl('admin.user.view', {id: response._id}) %>">
+                <i data-feather="user" class="font-medium-3 me-50"></i>
+                <span class="fw-bold">Account</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="<%= generateUrl('admin.user.security', {id: response._id}) %>">
+                <i data-feather="lock" class="font-medium-3 me-50"></i>
+                <span class="fw-bold">Security</span>
+            </a>
+        </li>
+    </ul>
+    <!--/ User Pills -->
+
+    <!-- Activity Timeline -->
+    <div class="card">
+        <h4 class="card-header">Recent <%= activities.length <=5 ? activities.length : 5 %> Activity Timeline</h4>
+        <div class="card-body pt-1">
+            <% if (activities.length) {%>
+            <ul class="timeline ms-50">
+                <% for (let activity of activities) {%>
+                <li class="timeline-item">
+                    <%
+                    stateNum = Math.floor(Math.random() * 6) + 1;
+                    states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary'];
+                    $state = states[stateNum]
+                    %>
+                    <span class="timeline-point timeline-point-<%= $state %> timeline-point-indicator"></span>
+                    <div class="timeline-event">
+                        <div class="d-flex justify-content-between flex-sm-row flex-column mb-sm-0 mb-1">
+                            <h6><%- activity.title %></h6>
+                            <span class="timeline-event-time me-1 handle-date-time" data-time="<%= activity.createdAt %>">Calculating . . .</span>
+                        </div>
+                        <p class="mb-0"><%- activity.description %></p>
+                        <% if (activity.file_full_path) {%>
+                            <a href="<%= activity.file_full_path %>" class="d-flex flex-row align-items-center mt-50">
+                                <img class="me-1" src="../../../app-assets/images/icons/unknown.png" alt="data.json" height="25" />
+                                <h6 class="mb-0">File</h6>
+                            </a>
+                        <%}%>
+                    </div>
+                </li>
+                <% } %>
+            </ul>
+            <%} else {%>
+                <p>No Activity Found!</p>
+            <%}%>
+        </div>
+    </div>
+    <!-- /Activity Timeline -->
+</div>
+<!--/ User Content -->

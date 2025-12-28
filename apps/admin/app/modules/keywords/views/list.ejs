@@ -1,0 +1,106 @@
+<% layout(layout_directory+'/mainLayout') -%>
+<!-- BEGIN: Content-->
+<div class="app-content content ">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper container-xxl p-0">
+    <div class="content-header row">
+    </div>
+    <div class="content-body">
+      <!-- users list start -->
+      <section class="app-user-list">
+        <div class="row">
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.count) %></h3>
+                          <span>Total Keywords</span>
+                      </div>
+                      <div class="avatar bg-light-info p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="key" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.activecount) %></h3>
+                          <span>Active Keywords</span>
+                      </div>
+                      <div class="avatar bg-light-success p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="key" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.inactivecount) %></h3>
+                          <span>Inactive Keywords</span>
+                      </div>
+                      <div class="avatar bg-light-danger p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="key" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+      </div>
+
+        </div>
+        <!-- list and filter start -->
+        <div class="card">
+          <div class="card-body border-bottom">
+            <h4 class="card-title"><%= page_title %></h4>
+            <div class="row">
+              <div class="col-md-4 user_status">
+                  <select id="KeywordStatusDropdown" class="form-select text-capitalize mb-md-0 mb-2xx cursor-pointer">
+                      <option value=""> View All Status </option>
+                      <option value="Active" <%= status && status=='Active'?'selected':'' %>> Active </option>
+                      <option value="Inactive" <%= status && status=='Inactive'?'selected':'' %>> Inactive </option>
+                  </select>
+              </div>
+          </div>
+          </div>
+          <div class="card-datatable table-responsive pt-0">
+            <section id="loader"></section>
+            <table class="deal-list-table table">
+              <thead class="table-light">
+                <tr>
+                  <th></th>
+                  <th>Keyword</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+        </div>
+        <!-- list and filter end -->
+      </section>
+      <!-- users list ends -->
+
+    </div>
+  </div>
+</div>
+<!-- END: Content-->
+
+<!-- BEGIN: Datatable JS-->
+<script src="/js/datatables/app-keyword-list.js"></script>
+<!-- END: Datatable JS-->
+

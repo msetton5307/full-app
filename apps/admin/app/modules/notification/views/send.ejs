@@ -1,0 +1,84 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+<div class="app-content content ">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper container-xxl p-0">
+    <div class="content-header row">
+      <div class="content-header-left col-md-9 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="col-12">
+            <h2 class="content-header-title float-start mb-0">Notifications</h2>
+            <div class="breadcrumb-wrapper">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active"> <%= page_title %>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-body">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body py-2">
+              <form class="needs-validation" novalidate id="notificationBroadcastForm" action="<%= generateUrl('admin.notification.send') %>" method="POST">
+                <div class="row">
+                  <div class="col-12 col-md-6 mb-1">
+                    <label class="form-label" for="deal_id">Deal (optional)</label>
+                    <select class="form-select" id="deal_id" name="deal_id">
+                      <option value="" selected>Select deal (optional)</option>
+                      <% deals.forEach(function(deal){ %>
+                        <option value="<%= deal._id %>"><%= deal.deal_title %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-6 mb-1">
+                    <label class="form-label" for="title">Notification Title</label><span style="color: red;">*</span>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter notification title" required />
+                    <div class="invalid-feedback">Title is required.</div>
+                  </div>
+                  <div class="col-12 mb-1">
+                    <label class="form-label" for="message">Notification Message</label><span style="color: red;">*</span>
+                    <textarea class="form-control" id="message" name="message" rows="3" placeholder="Enter notification message" required></textarea>
+                    <div class="invalid-feedback">Message is required.</div>
+                  </div>
+                  <div class="col-12 d-flex flex-sm-row flex-column mt-2">
+                    <button type="submit" class="btn btn-primary mb-1 mb-sm-0 me-0 me-sm-1">Send Notification</button>
+                    <a class="btn btn-outline-secondary" href="<%= generateUrl('user.dashboard') %>">Cancel</a>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+    const form = document.getElementById('notificationBroadcastForm');
+    const dealSelect = $('#deal_id');
+
+      dealSelect.select2({
+        placeholder: 'Select deal (optional)',
+        allowClear: true,
+      });
+
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  })();
+</script>

@@ -1,0 +1,204 @@
+<% layout(layout_directory+'/mainLayout') -%>
+<%
+    const firstName = user?.first_name ? user.first_name.trim() : '';
+    const lastName = user?.last_name ? user.last_name.trim() : '';
+    const displayName = user?.full_name?.trim() || [firstName, lastName].filter(Boolean).join(' ');
+%>
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">
+            <!-- Dashboard Ecommerce Starts -->
+            <section id="dashboard-ecommerce">
+                <div class="row match-height">
+                    <!-- Medal Card -->
+                    <!-- <div class="col-xl-4 col-md-6 col-12">
+                        <div class="card card-congratulation-medal">
+                            <div class="card-body">
+                                <h5>Congratulations 🎉 <%= displayName %>!</h5>
+                                <p class="card-text font-small-3">You have won gold medal</p>
+                                <h3 class="mb-75 mt-2 pt-50">
+                                    <a href="#">$48.9k</a>
+                                </h3>
+                                <button type="button" class="btn btn-primary">View Sales</button>
+                                <img src="/app-assets/images/illustration/badge.svg" class="congratulation-medal" alt="Medal Pic" />
+                            </div>
+                        </div>
+                    </div> -->
+                    <!--/ Medal Card -->
+
+                    <!-- Greetings Card starts -->
+
+                    
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div class="card card-congratulations">
+                            <div class="card-body text-center">
+                                <!-- <img src="/images/sample2.png" class="congratulations-img-left" alt="card-img-left" />
+                                <img src="/images/sample3.png" class="congratulations-img-right" " alt="card-img-right" /> -->
+                                <div class="avatar avatar-xl bg-primary shadow">
+                                    <div class="avatar-content">
+                                        <i data-feather="award" class="font-large-1"></i>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <h1 class="mb-1 text-white"> <%= greetings_data.greet  %> <%= displayName %>, </h1>
+                                    <p class="card-text m-auto w-75">
+                                        <%= greetings_data.greet_message %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Greetings Card ends -->
+
+
+                    <div class="col-12">
+                        <div class="card card-statistics">
+                            <div class="card-header">
+                                <h4 class="card-title">Users Statistics</h4>
+                                <!-- <div class="d-flex align-items-center">
+                                    <p class="card-text font-small-2 me-25 mb-0 calc-time-diff">Updated <%= moment().format() %></p>
+                                </div> -->
+                            </div>
+                            <div class="card-body statistics-body">
+                                <div class="row">
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.user.listing') %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-success me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= totalUsers %></h4>
+                                                <p class="card-text font-small-3 mb-0">Total User</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.user.listing',{},{status:"Unblock"}) %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-info me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user-check"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= activeUsers %></h4>
+                                                <p class="card-text font-small-3 mb-0">Unblocked User</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.user.listing',{},{status:"Block"}) %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-danger me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user-x"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= inActiveUsers %></h4>
+                                                <p class="card-text font-small-3 mb-0">Blocked User</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card card-statistics">
+                            <div class="card-header">
+                                <h4 class="card-title">Category Statistics</h4>
+                                <!-- <div class="d-flex align-items-center">
+                                    <p class="card-text font-small-2 me-25 mb-0 calc-time-diff">Updated <%= moment().format() %></p>
+                                </div> -->
+                            </div>
+                            <div class="card-body statistics-body">
+                                <div class="row">
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.category.listing') %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-success me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= totalCategory %></h4>
+                                                <p class="card-text font-small-3 mb-0">Total Category</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.category.listing',{},{status:"Active"}) %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-info me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user-check"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= totalActiveCategory %></h4>
+                                                <p class="card-text font-small-3 mb-0">Active Category</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+
+                                        <a href="<%= generateUrlWithQuery('admin.category.listing',{},{status:"Inactive"}) %>">
+                                        <div class="d-flex flex-row">
+                                                <div class="avatar bg-light-danger me-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="user-x"></i>
+                                                    </div>
+                                                </div>
+                                            
+                                            <div class="my-auto">
+                                                <h4 class="fw-bolder mb-0"><%= totalInactiveCategory %></h4>
+                                                <p class="card-text font-small-3 mb-0">Inactive Category</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                   
+                </div>
+
+                
+            </section>
+            <!-- Dashboard Ecommerce ends -->
+
+        </div>
+    </div>
+</div>
+
+<!-- BEGIN: Page JS-->
+<script src="/js/pages/dashboard-ecommerce.js"></script>
+<!-- END: Page JS-->

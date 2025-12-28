@@ -1,0 +1,195 @@
+<% layout(module_directory+'/user/views/user-details') -%>
+<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/maps/leaflet.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/maps/map-leaflet.css">
+<!-- User Content -->
+<div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
+    <!-- User Pills -->
+    <ul class="nav nav-pills mb-2">
+        <li class="nav-item">
+            <a class="nav-link" href="<%= generateUrl('admin.user.view', {id: response._id}) %>">
+                <i data-feather="user" class="font-medium-3 me-50"></i>
+                <span class="fw-bold">Account</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="<%= generateUrl('admin.user.security', {id: response._id}) %>">
+                <i data-feather="lock" class="font-medium-3 me-50"></i>
+                <span class="fw-bold">Security</span>
+            </a>
+        </li>
+    </ul>
+    <!--/ User Pills -->
+
+    <!-- Change Password -->
+    <div class="card">
+        <h4 class="card-header">Change Password</h4>
+        <div class="card-body">
+            <form id="formChangePassword" action="<%= generateUrl('user.userUpdatePassword') %>" method="POST" enctype='application/x-www-form-urlencoded'>
+                <div class="alert alert-warning mb-2" role="alert">
+                    <h6 class="alert-heading">Ensure that these requirements are met</h6>
+                    <div class="alert-body fw-normal">Minimum 8 characters long, uppercase, lowercase, number & symbol between: <b><i>#?!@$%^&*-</i></b></div>
+                </div>
+
+                <div class="row">
+                    <div class="mb-2 col-md-6 form-password-toggle">
+                        <label class="form-label" for="newPassword">New Password</label><span
+                        style="color: red;">*</span>
+                        <div class="input-group input-group-merge form-password-toggle">
+                            <input class="form-control" type="password" id="newPassword" name="newPassword" placeholder="New Password" />
+                            <span class="input-group-text cursor-pointer">
+                                <i data-feather="eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2 col-md-6 form-password-toggle">
+                        <label class="form-label" for="confirmPassword">Confirm New Password</label><span
+                        style="color: red;">*</span>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm New Password;" />
+                            <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="hidden" name="id" value="<%= response._id %>">
+                        <button type="submit" class="btn btn-primary me-2">Change Password</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!--/ Change Password -->
+
+    <!-- recent device -->
+    <!-- <div class="card">
+        <div class="card-header border-bottom">
+            <h4 class="card-title">Connected Devices</h4>
+        </div>
+        <div class="card-body my-2 py-25">
+            <div class="table-responsive">
+                <%
+                    response.userdevices = response.userdevices.map(item=>{return (!item.expired)?item:null});
+                    response.userdevices = _.without(response.userdevices, null);
+                %>
+                <% if (response.userdevices && response.userdevices.length) {%>
+                <table class="table table-bordered text-nowrap text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-start">BROWSER</th>
+                            <th>IP</th>
+                            <th>DEVICE</th>
+                            <th>LOCATION</th>
+                            <th>CREATED ON</th>
+                            <th>RECENT ACTIVITY</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% allDevices = []; for (let device of response.userdevices) {%>
+                        <% if (!device.expired) {%>
+                        <% deviceInfo = '';
+                            if (device.browserInfo && device.browserInfo.name) {
+                                deviceInfo = device.browserInfo.name + (device.browserInfo.version? " (" + device.browserInfo.version + ")":"");
+                            }
+
+                            if (device.deviceInfo && (device.deviceInfo.vendor || device.deviceInfo.model || device.deviceInfo.type)) {
+                                if (deviceInfo.length) {
+                                    deviceInfo += '<br>'
+                                }
+
+                                if (device.deviceInfo.vendor) {
+                                    deviceInfo += ('<b>Vendor:</b> ' + device.deviceInfo.vendor + " ");
+                                }
+
+                                if (device.deviceInfo.model) {
+                                    deviceInfo += ('<b>Model:</b> ' + device.deviceInfo.model + " ");
+                                }
+
+                                if (device.deviceInfo.type) {
+                                    deviceInfo += ('<b>Type:</b> ' + device.deviceInfo.type + " ");
+                                }
+                            }
+
+                            if (device.operatingSystem && device.operatingSystem.name) {
+                                if (deviceInfo.length) {
+                                    deviceInfo += '<br>'
+                                }
+
+                                deviceInfo += ('<b>OS:</b> ' + device.operatingSystem.name + (device.operatingSystem.version?" " + device.operatingSystem.version:''));
+                            }
+
+                            location = '';
+                            if (device.city) {
+                                location = (device.city + ' ');
+                            }
+                            if (device.state) {
+                                if (location.length) {
+                                    location += ', ';
+                                }
+                                location += (device.state + ' ');
+                            }
+                            if (device.country) {
+                                if (location.length) {
+                                    location += ', ';
+                                }
+                                location += (device.country + ' ');
+                            }
+
+                            lat = ''; long = '';
+                            if (device.ip_lat) {
+                                lat = device.ip_lat;
+                            }
+
+                            if (device.ip_long) {
+                                long = device.ip_long;
+                            }
+                            
+                            deviceInfo += `<br><button type="button" data-url="${generateUrl('admin.user.security', {id: response._id})}" data-location="${generateUrl('user.revoke_access', {id: user._id, access: device._id})}" class="btn btn-outline-secondary mt-1 revoke_access">Revoke Access</button>`;
+                            allDevices.push({
+                                device: deviceInfo,
+                                lat: lat,
+                                long: long
+                            });
+                        %>
+                        <tr>
+                            <td class="text-start">
+                                <span><%- deviceInfo %></span> 
+                            </td>
+                            <td><%- device.ip?device.ip + (device.timezone? "<br>(" + device.timezone + ")":''):'N/A' %></td>
+                            <td><%= location.length?location:'N/A' %></td>
+                            <td><%= device.createdAt?moment(device.createdAt).format('Do of MMMM, YYYY - hh:mm A Z'):'N/A' %></td>
+                            <td><%= device.last_active?moment(device.last_active).format('Do of MMMM, YYYY - hh:mm A Z'):'N/A' %></td>
+                        </tr>
+                        <% } %>
+                        <% } %>
+                        <input type="hidden" id="allDevices" value="<%= JSON.stringify(allDevices) %>">
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <p>No Record Available</p>
+                <% } %>
+            </div>
+        </div>
+    </div> -->
+    <!-- / recent device -->
+
+    <% if (response.userdevices && response.userdevices.length) {%>
+    <section class="maps-leaflet">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title">Device Locations</h4>
+            </div>
+            <div class="card-body">
+                <div class="leaflet-map" id="user-location"></div>
+            </div>
+        </div>
+    </section>
+    <% } %>
+</div>
+<!--/ User Content -->
+
+<!-- BEGIN: Page Vendor JS-->
+<script src="/app-assets/vendors/js/maps/leaflet.min.js"></script>
+<!-- END: Page Vendor JS-->
+
+<!-- BEGIN: Page JS-->
+<script src="/js/pages/userSecurityMaps.js"></script>
+<!-- END: Page JS-->

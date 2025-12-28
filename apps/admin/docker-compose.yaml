@@ -1,0 +1,34 @@
+services:
+
+  #React Nextjs Node Service
+
+  node:
+
+    image: webskittersdocker/nvmnode20:latest
+
+    container_name: sysaving-node20
+
+    restart: unless-stopped
+
+    working_dir: /home/wtsadmin/myapp
+
+    volumes:
+
+      - ./:/home/wtsadmin/myapp
+
+    ports:
+
+      - "1844:1844"
+    command: >
+      sh -c "npm start"
+
+
+#Docker Networks
+
+networks:
+  default:
+    external:
+      name: webskitters
+
+
+

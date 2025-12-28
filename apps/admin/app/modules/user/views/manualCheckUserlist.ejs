@@ -1,0 +1,140 @@
+<% layout(layout_directory+'/mainLayout') -%>
+<!-- BEGIN: Content-->
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">
+            <!-- users list start -->
+            <section class="app-user-list">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-6">
+                        <div class="card">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h3 class="fw-bolder mb-75"><%= utils.numFormatter(stats.totalRequests) %></h3>
+                                    <span>Total Requests</span>
+                                </div>
+                                <div class="avatar bg-light-success p-50" style="cursor: default !important;">
+                                    <span class="avatar-content">
+                                        <i data-feather="user-check" class="font-medium-4"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="col-lg-4 col-sm-6">
+                        <div class="card">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h3 class="fw-bolder mb-75"><%= utils.numFormatter(stats.totalUsers) %></h3>
+                                    <span>Total Users</span>
+                                </div>
+                                <div class="avatar bg-light-primary p-50" style="cursor: default !important;">
+                                    <span class="avatar-content">
+                                        <i data-feather="user" class="font-medium-4"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                    
+           
+                
+            
+                </div>
+                <!-- list and filter start -->
+                <div class="card">
+                    <!-- <div class="card-body border-bottom">
+                        <h4 class="card-title"><%= page_title %></h4>
+                        <div class="row">
+                            <div class="col-md-4 user_status">
+                                <select id="StatusDropdown" class="form-select text-capitalize mb-md-0 mb-2xx cursor-pointer">
+                                    <option value=""> View All Status </option>
+                                    <option value="Unblock" <%= status && status=='Unblock'?'selected':'' %>> Unblock </option>
+                                    <option value="Block" <%= status && status=='Block'?'selected':'' %>> Block </option>
+                                     <option value="Banned" <%= status && status=='Banned'?'selected':'' %>> Banned </option> -->
+                                <!-- </select> -->
+                            <!-- </div> -->
+                        <!-- </div> -->
+                    <!-- </div>  -->
+                    <div class="card-datatable table-responsive pt-0">
+                        <table class="user-list-table table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th></th>
+                                    <th>Name</th>
+                                    <th>Joined On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="modal modal-slide-in edit-user-modal-start fade" id="modals-slide-edit">
+                        <div class="modal-dialog">
+                            <form class="edit-user-modal-form modal-content pt-0" id="editUserForm" action="<%= generateUrl('user.update') %>" method="POST" enctype='multipart/form-data'>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                                <div class="modal-header mb-1">
+                                    <h5 class="modal-title" id="exampleModalLabel">Edit User</h5>
+                                </div>
+                                <div class="modal-body flex-grow-1">
+                                    <div class="mb-1">
+                                        <label class="form-label" for="basic-icon-default-fullname">Full Name</label><span
+                                        style="color: red;">*</span>
+                                        <input type="text" id="user-edit-name" class="form-control dt-fullName"  placeholder="Full Name" name="fullName" />
+                                    </div>
+                                    <div class="mb-1">
+                                        <label class="form-label" for="basic-icon-default-email">Email</label><span
+                                        style="color: red;">*</span>
+                                        <input type="text" id="user-edit-email" class="form-control dt-email" placeholder="Email" name="email" />
+                                    </div>
+                                    <div class="mb-1">
+                                        <label class="form-label" for="basic-icon-default-contact">Contact (US)</label><span
+                                        style="color: red;">*</span>
+                                        <input type="text" id="user-edit-phone" class="form-control dt-contact" placeholder="Contact (US)" name="phone" />
+                                    </div>
+
+                                    <div class="mb-1">
+                                        <a class="imageHref" href="/uploads/noImage.png"  class="me-25">
+                                            <img onerror="this.onerror=null; this.src='/uploads/noImage.png';" src="/uploads/noImage.png" id="userImg" class="rounded me-50" alt="brand image"
+                                                style="max-width: 100px; max-height: 100px;" />
+                                        </a>
+                                        <label for="image" class="btn btn-sm btn-primary mb-7
+                                        5 me-75 form-label">Upload
+                                            Image</label>
+                                        <input type="file" onchange="previewImage()" name="profile_image" id="image" hidden accept="image/*" />
+                                        <p class="mb-0">Upload image file only.</p>
+                                    </div>
+                                
+                                   
+                                    <input type="hidden" name="id" id="user-edit-id">
+                                    <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
+                                    <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                   
+                </div>
+                <!-- list and filter end -->
+            </section>
+            <!-- users list ends -->
+
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<!-- BEGIN: Datatable JS-->
+<script src="/js/datatables/app-user-manual-check-list.js"></script>
+<!-- END: Datatable JS-->
+
+
+<script>
+    function previewImage() {
+        userImg1.src = URL.createObjectURL(event.target.files[0]);
+        userImg.src = URL.createObjectURL(event.target.files[0]);
+    }
+  </script>

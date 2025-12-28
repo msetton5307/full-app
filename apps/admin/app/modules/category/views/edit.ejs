@@ -1,0 +1,124 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">
+                                <%= page_title %>
+                            </h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/category/list">Edit Category</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">
+                                        <%= page_title %>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <!-- <div class="card-header border-bottom">
+                            <h4 class="card-title"></h4>
+                        </div> -->
+                            <div class="card-body py-2">
+                                <!-- form -->
+                                <form class="edit-faq-modal-form modal-content pt-0" id="add-new-category"
+                                    action="<%= generateUrl('category.update') %>" method="POST"
+                                    enctype='multipart/form-data'>
+                                    
+                                    <div class="modal-body flex-grow-1">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <label class="form-label" for="basic-icon-default-fullname">Category
+                                                    Title</label><span style="color: red;">*</span>
+                                                <input type="text" class="form-control dt-full-name" id="title"
+                                                    placeholder="Category Title" value="<%=response.title%>" name="title" />
+                                            </div>
+                                            <div class="category-dropdown col-lg-6">
+                                                <label class="form-label asterisk" for="serviceId">Category</label><span
+                                                    style="color: red">*</span>
+                                                <select name="parentId" id="serviceId" class="form-control required">
+                                                    <!-- Default "Select Category" option -->
+                                                    <option value="" <%=response.parentId===null ? 'selected' : '' %>>Select
+                                                        Category</option>
+    
+                                                    <!-- Iterate over categories -->
+                                                    <% category.forEach(e=> { %>
+                                                        <option value="<%= e._id %>" <%=response.parentId &&
+                                                            response.parentId.toString()===e._id.toString() ? 'selected'
+                                                            : '' %>>
+                                                            <%= e.title %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        
+
+                                        <br>
+
+                                        <div class="mb-1">
+                                            <!-- upload and reset button -->
+                                            <a class="me-25">
+                                                <% if (response.image) {%>
+                                                    <a href="/uploads/category/<%= response.image %>" class="me-25"
+                                                        target="_blank">
+                                                        <img src="/uploads/category/<%= response.image %>"
+                                                            id="account-upload-img" class="uploadedAvatar rounded me-50"
+                                                            alt="No image found"
+                                                            style="max-width: 100px; max-height: 100px;" />
+                                                    </a>
+                                                    <%} else {%>
+                                                        <a href="/uploads/noImage.png" class="me-25">
+                                                            <img src="/uploads/noImage.png" id="account-upload-img"
+                                                                class="uploadedAvatar rounded me-50"
+                                                                style="max-width: 100px; max-height: 100px;" />
+                                                        </a>
+                                                        <% } %>
+                                            </a>
+
+                                            <label for="account-upload"
+                                                class="btn btn-sm btn-primary mb-75 me-75 form-label">Upload
+                                                Image</label><span style="color: red;">*</span>
+                                            <input type="file" name="image" id="account-upload" class="imageupload"
+                                                hidden accept="image/*" />
+                                            <button type="button" id="account-reset"
+                                                class="btn btn-sm btn-outline-secondary mb-75 d-none">Reset</button>
+                                            <p class="mb-0">Upload image file only.</p>
+                                            <p id="lblError" class="mt-2" style="color: red;"></p>
+                                            <!--/ upload and reset button -->
+                                        </div>
+                                        
+                                        <input type="hidden" value="<%=response._id%>" name="id" id="category-edit-id">
+                                        <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
+                                        <!-- <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button> -->
+                                        <a class="btn btn-outline-secondary" href="/category/list">Cancel</a>
+                                    </div>
+                                </form>
+                                <!--/ form -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .ql-editor {
+            height: 150px;
+        }
+    </style>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "709705813616",
+    "project_id": "sysavings-5ad56",
+    "storage_bucket": "sysavings-5ad56.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709705813616:android:39c6ef7ea7a1631027aeb5",
+        "android_client_info": {
+          "package_name": "com.sysavings"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSZghv6_66Cq9ef11lxmxpAINkQPWUWm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

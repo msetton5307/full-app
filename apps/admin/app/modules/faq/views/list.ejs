@@ -1,0 +1,190 @@
+<% layout(layout_directory+'/mainLayout') -%>
+<!-- BEGIN: Content-->
+<div class="app-content content ">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper container-xxl p-0">
+    <div class="content-header row">
+    </div>
+    <div class="content-body">
+      <!-- users list start -->
+      <section class="app-user-list">
+        <div class="row">
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.count) %></h3>
+                          <span>Total FAQ</span>
+                      </div>
+                      <div class="avatar bg-light-info p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="help-circle" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.activecount) %></h3>
+                          <span>Active FAQ</span>
+                      </div>
+                      <div class="avatar bg-light-success p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="help-circle" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-6">
+              <div class="card">
+                  <div class="card-body d-flex align-items-center justify-content-between">
+                      <div>
+                          <h3 class="fw-bolder mb-75"><%= utils.numFormatter(data.inactivecount) %></h3>
+                          <span>Inactive FAQ</span>
+                      </div>
+                      <div class="avatar bg-light-danger p-50" style="cursor: default !important;">
+                          <span class="avatar-content">
+                              <i data-feather="help-circle" class="font-medium-4"></i>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+      </div>
+
+        </div>
+        <!-- list and filter start -->
+        <div class="card">
+          <div class="card-body border-bottom">
+            <h4 class="card-title"><%= page_title %></h4>
+            <div class="row">
+              <div class="col-md-4 user_status">
+                  <select id="FaqStatusDropdown" class="form-select text-capitalize mb-md-0 mb-2xx cursor-pointer">
+                      <option value=""> View All Status </option>
+                      <option value="Active" <%= status && status=='Active'?'selected':'' %>> Active </option>
+                      <option value="Inactive" <%= status && status=='Inactive'?'selected':'' %>> Inactive </option>
+                  </select>
+              </div>
+          </div>
+          </div>
+          <div class="card-datatable table-responsive pt-0">
+            <section id="loader"></section>
+            <table class="faq-list-table table">
+              <thead class="table-light">
+                <tr>
+                  <th></th>
+                  <th>Question</th>
+                  <th>Answer</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          <!-- Modal to add new faq starts-->
+          <div class="modal modal-slide-in new-faq-modal fade" id="modals-slide-in">
+            <div class="modal-dialog">
+              <form class="add-new-faq modal-content pt-0" id="faqAddFormValidation" action="<%= generateUrl('faq.insert') %>" method="POST" enctype='multipart/form-data'>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <div class="modal-header mb-1">
+                  <h5 class="modal-title" id="exampleModalLabel">Add FAQ</h5>
+                </div>
+                <div class="modal-body flex-grow-1">
+                  <div class="mb-1">
+                    <label class="form-label" for="basic-icon-default-fullname">Question</label><span
+                    style="color: red;">*</span>
+                    <input type="text" class="form-control dt-full-name" id="question" placeholder="Question" name="question" />
+                  </div>
+                  <div class="mb-1">
+                    <label for="basic-icon-default-bio">Answer</label><span
+                    style="color: red;">*</span>
+                    <textarea class="form-control char-textarea" name="answer" id="answer" placeholder="Answer" rows="3" data-length="30"></textarea>
+                    <small class="textarea-counter-value float-end"><span class="char-count">0</span> / 30 </small>
+                  </div>
+                  <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
+                  <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- Modal to add new faq Ends-->
+
+          <!-- Modal to update faq starts-->
+          <div class="modal modal-slide-in edit-faq-modal-start fade" id="modals-slide-edit">
+            <div class="modal-dialog">
+              <form class="edit-faq-modal-form modal-content pt-0" id="faqEditFormValidation" action="<%= generateUrl('faq.update') %>" method="POST" enctype='multipart/form-data'>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <div class="modal-header mb-1">
+                  <h5 class="modal-title" id="exampleModalLabel">Edit FAQ</h5>
+                </div>
+                <div class="modal-body flex-grow-1">
+                  <div class="mb-1">
+                    <label class="form-label" for="basic-icon-default-fullname">Question</label><span
+                    style="color: red;">*</span>
+                    <input type="text" class="form-control dt-full-name" id="faq-edit-question" placeholder="Question" name="question" />
+                  </div>
+                  <div class="mb-1">
+                    <label for="basic-icon-default-bio">Answer</label><span
+                    style="color: red;">*</span>
+                    <textarea class="form-control char-textarea" name="answer" id="faq-edit-answer" placeholder="Answer" rows="3" data-length="30"></textarea>
+                    <small class="textarea-counter-value float-end"><span class="char-count">0</span> / 30 </small>
+                  </div>
+                  <input type="hidden" name="id" id="faq-edit-id">
+                  <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
+                  <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- Modal to update faq Ends-->
+
+        </div>
+        <!-- list and filter end -->
+      </section>
+      <!-- users list ends -->
+
+    </div>
+  </div>
+</div>
+<!-- END: Content-->
+
+<!-- BEGIN: Datatable JS-->
+<script src="/js/datatables/app-faq-list.js"></script>
+<!-- END: Datatable JS-->
+
+<style>
+  #loader {
+      border: 16px solid #21075f;
+      border-radius: 50%;
+      border-top: 16px solid #7367f0;
+      width: 80px;
+      height: 80px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 999;
+  }   
+  
+  
+  @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+  }
+</style>

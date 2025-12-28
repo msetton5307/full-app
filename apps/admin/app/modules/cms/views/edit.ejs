@@ -1,0 +1,93 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+<div class="app-content content ">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper container-xxl p-0">
+    <div class="content-header row">
+      <div class="content-header-left col-md-9 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="col-12">
+            <h2 class="content-header-title float-start mb-0"><%= page_title %></h2>
+            <div class="breadcrumb-wrapper">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                </li>
+
+                <li class="breadcrumb-item"><a href="<%= generateUrl('admin.cms.list') %>">General CMS</a>
+                </li>
+                <li class="breadcrumb-item active"> <%= page_title %>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-body">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body py-2">
+
+              <!-- BODY -->
+              <form class="validate-form" id="add-new-cms" action="<%= generateUrl("cms.update") %>" method="POST">
+                <div class="row">
+
+                  <div class="col-12 col-sm-6 mb-1">
+                    <label class="form-label" for="header">Title</label><span style="color: red;">*</span>
+                    <input type="text" class="form-control" name="title" id="title" placeholder="Title" value="<%= response.title %>">
+                  </div>
+                  <div class="col-12 col-sm-12 mb-1">
+                    <label class="form-label" for="sub_header">Content</label><span style="color: red;">*</span>
+                    <!-- <input type="text" class="form-control" name="content" id="content" placeholder="Content"> -->
+                    <textarea class="form-control textarea" name="content" id="content" placeholder="Content" rows="3" data-length="30"><%=response.content%></textarea>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-12">
+                       
+                    <input type="hidden" name="id" value="<%= response._id %>">
+                    <button type="submit" class="btn btn-primary mt-1 me-1">Update</button>
+                    <!-- <button type="reset" class="btn btn-outline-secondary mt-1">Discard</button> -->
+                    <a class="btn btn-outline-secondary mt-1 me-1"  href="<%= generateUrl('admin.cms.list') %>">Back</a>
+
+                    <!-- <button type="reset" id="reset" class="btn btn-outline-secondary mt-1">Reset</button> -->
+                  </div>
+                </div>
+              </form>
+              <!-- END BODY -->
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ql-editor {
+    height: 150px;
+  }
+</style>
+
+<script>
+        ClassicEditor
+    .create(document.querySelector('#content'))
+    .then(editor => {
+        console.log(editor);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+
+</script>
+
+<script>
+  $(document).ready(function() {
+  $('.taskers').select2();
+});
+</script>
+

@@ -1,0 +1,158 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+  <div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+      <div class="content-header row">
+        <div class="content-header-left col-md-9 col-12 mb-2">
+          <div class="row breadcrumbs-top">
+            <div class="col-12">
+              <h2 class="content-header-title float-start mb-0">
+                <%= page_title %>
+              </h2>
+              <div class="breadcrumb-wrapper">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="<%= generateUrl('admin.faq.listing') %>">FAQ List</a>
+                  </li>
+                  <li class="breadcrumb-item active"> View Details
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section>
+        <div class="view_details_wrapper">
+          <div class="view_wrapper_header">
+            <h4></h4>
+            <!-- <button>Back</button> -->
+            <a class="btn btn-outline-secondary" href="<%= generateUrl('admin.faq.listing') %>">Back</a>
+          </div>
+
+          <div class="view_wrapper_body" style="word-wrap:break-word;">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="view_wrapper_box">
+                  <label>Question</label>
+                  <p>
+                    <%= data.question %>
+                  </p>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="view_wrapper_box">
+                  <label>Date</label>
+                  <p><span>
+                      <%= data.createdAt ? moment(data.createdAt).format('MMMM Do YYYY') :'N/A' %>
+                    </span></p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="view_wrapper_box">
+                  <label>Answer</label>
+                  <p>
+                    <%= data.answer%>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="/property-assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/property-assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="/property-assets/js/main.js"></script>
+  <script src="/app-assets/vendors/js/maps/leaflet.min.js"></script>
+  <style>
+    .ql-editor {
+      height: 150px;
+    }
+
+    .view_details_wrapper {
+      padding: 20px 20px;
+    }
+
+    .view_wrapper_header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      /* border-bottom: 1px solid #9ACE00; */
+    }
+
+    .view_wrapper_header h4 {
+      font-size: 18px;
+      margin: 0;
+      color: #2f2f2f;
+    }
+
+    .view_wrapper_header button {
+      background: #9ACE00;
+      border: none;
+      padding: 20px 30px;
+      line-height: 0;
+      border-radius: 5px;
+      color: #000000;
+      font-size: 15px;
+      font-weight: bold;
+      border: 1px solid #9ACE00;
+    }
+
+    .view_wrapper_header button:hover {
+      background: #000000;
+      border: 1px solid #9ACE00;
+      color: #9ACE00;
+    }
+
+    .view_wrapper_header a {
+      background: #9ACE00;
+      border: none;
+      padding: 20px 30px;
+      line-height: 0;
+      border-radius: 5px;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: bold;
+      border: 1px solid #9ACE00;
+    }
+
+    .view_wrapper_header a:hover {
+      background: #7c309c;
+      border: 1px solid #9ACE00;
+      color: black !important;
+    }
+
+    .view_wrapper_body {
+      padding: 20px 0;
+    }
+
+    .view_wrapper_box {
+      box-shadow: 0 0 5px 0 #000000;
+      padding: 10px 10px;
+      margin: 0 0 15px;
+    }
+
+    .view_wrapper_box label {
+      font-size: 14px;
+      color: #121010;
+      text-transform: capitalize;
+      margin: 0 0 10px;
+    }
+
+    .view_wrapper_box p {
+      font-size: 16px;
+      color: rgb(9, 9, 9);
+      padding: 10px 20px;
+      border-left: 2px solid #9ACE00;
+      ;
+    }
+  </style>

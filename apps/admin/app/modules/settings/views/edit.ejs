@@ -1,0 +1,140 @@
+<% layout(layout_directory+'/mainLayout') -%>
+
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Settings</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('settings.edit')%>">Settings</a>
+                                </li>
+                                <li class="breadcrumb-item active"> <%= page_title %>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                    <ul class="nav nav-pills mb-2">
+                        <!-- account -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= generateUrl('admin.profile', {id: user._id})%>">
+                                <i data-feather="user" class="font-medium-3 me-50"></i>
+                                <span class="fw-bold">Account</span>
+                            </a>
+                        </li>
+                        <!-- security -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= generateUrl('admin.security', {id: user._id})%>">
+                                <i data-feather="lock" class="font-medium-3 me-50"></i>
+                                <span class="fw-bold">Security</span>
+                            </a>
+                        </li>
+                         <!-- setting -->
+                        <li class="nav-item">
+                            <a class="nav-link active" href="<%= generateUrl('settings.edit')%>">
+                                <i data-feather="settings" class="font-medium-3 me-50"></i>
+                                <span class="fw-bold"><%=page_title%></span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="card">
+                        <!-- <div class="card-header border-bottom">
+                            <h4 class="card-title"></h4>
+                        </div> -->
+
+
+                        <div class="card-body py-2">
+                            <!-- form -->
+                            <form class="validate-form" id="settingsform" action="<%= generateUrl("settings.update") %>" method="POST" enctype='application/x-www-form-urlencoded'>
+                                <div class="row">
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="contactNumber">Contact Number (US)</label><span
+                                        style="color: red;">*</span>
+                                        <input type="text" class="form-control dt-contact" name="contactNumber" id="contactNumber" placeholder="Contact Number (US)" value="<%= response.contactNumber %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="email">Email</label><span
+                                        style="color: red;">*</span>
+                                        <input type="email" class="form-control" name="email" id="email" placeholder="Email" value="<%= response.email %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="address">Address</label><span
+                                        style="color: red;">*</span>
+                                        <input type="text" class="form-control" name="address" id="address" placeholder="Address" value="<%= response.address %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="playstoreURL">Google Play Store URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="playstoreURL" id="playstoreURL" placeholder="Google Play Store URL" value="<%= response.playstoreURL %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="applestoreURL">Apple Store URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="applestoreURL" id="applestoreURL" placeholder="Apple Store URL" value="<%= response.applestoreURL %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="fb">Facebook URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="socialLinks.fb" id="fb" placeholder="Facebook URL" value="<%= response.socialLinks.fb %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="twtr">Twitter URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="socialLinks.twtr" id="twtr" placeholder="Twitter URL" value="<%= response.socialLinks.twtr %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="insta">Instagram URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="socialLinks.insta" id="insta" placeholder="Instagram URL" value="<%= response.socialLinks.insta %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="lnkdn">LinkedIn URL</label><span
+                                        style="color: red;">*</span>
+                                        <input type="url" class="form-control" name="socialLinks.lnkdn" id="lnkdn" placeholder="LinkedIn URL" value="<%= response.socialLinks.lnkdn %>">
+                                    </div>
+                                    <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="amountToPayCustomer">Amount To Pay Customer</label><span
+                                        style="color: red;">*</span>
+                                        <input type="number" class="form-control" name="amountToPayCustomer" id="amountToPayCustomer" placeholder=" Enter Amount" value="<%= response.amountToPayCustomer %>">
+                                    </div>
+                                    <!-- <div class="col-12 col-sm-4 mb-1">
+                                        <label class="form-label" for="category">Time Zone</label><span
+                                        style="color: red;">*</span>
+                                    <select name="time_zone" id="time_zone"
+                                    class="select2 form-control selectpicker" >
+                                        <option disabled selected>Please Choose The Time Zone</option>
+                                        <% time_zones.map(data=> { %>
+                                            <option value="<%= data.tzCode %>" <%= data.tzCode === response.time_zone ? 'selected' : '' %>><%= data.tzCode %></option>
+                                            <% }) %>
+                                    </select>
+                                    </div>
+                                 -->
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary mt-1 me-1">Save changes</button>
+                                        <button type="reset"  class="btn btn-outline-secondary mt-1">Discard</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <!--/ form -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+

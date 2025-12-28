@@ -1,0 +1,141 @@
+<% layout(layout_directory+'/mainLayout') -%>
+<link rel="stylesheet" type="text/css" href="/app-assets/css/components.css">
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0"><%= page_title %></h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('user.dashboard') %>">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="<%= generateUrl('admin.user.listing') %>">User List</a>
+                                </li>
+                                <li class="breadcrumb-item active"> <%= page_title %>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- <div class="card-header border-bottom">
+                            <h4 class="card-title"></h4>
+                        </div> -->
+                        <div class="card-body py-2">
+                            <!-- form -->
+                            <form>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                            <label>Full Name</label>
+                                            <p><%= response.fullName %></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                            <label>User Name</label>
+                                            <p><%= response.userName %></p>
+                                        </div>
+                                    </div>                      
+                                </div>
+
+                                <div class="row">
+                                
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                            <label>Email</label>
+                                            <p><%= response.email %></p>
+                                        </div>
+                                    </div>    
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                            <label>Phone No.</label>
+                                            <p id="formattedPhoneNumber"><%-response.phone %></p>
+                                        </div>
+                                    </div>                           
+                                </div>
+                              
+
+                                <div class="row">
+                                    
+                                                          
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                          <label>DOB</label>
+                                          <p><span>
+                                              <%= response.dob ? moment(response.dob).format('MMMM Do YYYY') :'N/A' %>
+                                            </span></p>
+                                        </div>
+                                      </div>
+                                    <div class="col-lg-6">
+                                        <div class="view_wrapper_box">
+                                            <label><b>Profile Image:</b></label> <br>
+
+                                            <%if(response.profile_image == ""){%>
+                                                <img src="/uploads/noImage.png"
+                                                    class="rounded me-60"
+                                                    style="max-width: 150px; max-height: 150px;" />
+                                                <%}else{%>
+                                                    <img src="/uploads/user/profile_pic/<%=response.profile_image%>"
+                                                    class="rounded me-60"
+                                                    style="max-width: 150px; max-height: 150px;" />
+                                                    <%}%>
+                                        </div>
+                                    </div> 
+                                    
+                                </div>
+                                <div class="row">
+                                    <!-- <div class="col-1">
+                                        <a type="reset" class="btn btn-success mt-1" href="/user/verify-gender/<%=response._id%>?status=accept">Accept</a>
+                                    </div><div class="col-1">
+                                        <a type="reset" class="btn btn-danger mt-1" href="/user/verify-gender/<%=response._id%>?status=reject">Reject</a>
+                                    </div> -->
+                                    <div class="col-1">
+                                        <a type="reset" class="btn btn-outline-danger mt-1" href="<%= generateUrl('admin.user.listing') %>">Back</a>
+                                    </div>
+                                </div>
+                            </form>
+                            <!--/ form -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    .ql-editor {
+        height: 150px;
+    }
+</style>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var phoneNumber = "<%- response.phone %>"; // Get the phone number from your backend
+        
+        // Remove any non-digit characters from the phone number
+        var cleanedPhoneNumber = phoneNumber.replace(/\D/g, '');
+        
+        // Format the number as (XXX) XXX-XXXX
+        var formattedPhoneNumber =cleanedPhoneNumber.substring(0, 3) + '-' +
+                                   cleanedPhoneNumber.substring(3, 6) + '-' +
+                                   cleanedPhoneNumber.substring(6);
+        
+        // Display the formatted phone number in the paragraph element
+        document.getElementById("formattedPhoneNumber").innerText = formattedPhoneNumber;
+    });
+    </script>
