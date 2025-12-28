@@ -63,6 +63,10 @@ const getPort = config.app.port;
 const getApiFolderName = config.app.getApiFolderName;
 
 const getAdminFolderName = config.app.getAdminFolderName;
+const buildServerUrl = (port) => {
+    const host = process.env.HOST || 'localhost';
+    return (global.BASE_URL && global.BASE_URL !== '') ? global.BASE_URL : `http://${host}:${port}`;
+};
 app.locals.moment = require('moment');
 // Inclide main view path for (admin) //
 app.locals.layout_directory = '../views/layouts';
@@ -185,7 +189,38 @@ const onError = (error) => {
         const server = http.createServer(app);
         server.listen(getPort);
         server.on('error', onError);
-        console.log(`${config.app.project_name} is running on ${(global.BASE_URL && global.BASE_URL !== '') ? global.BASE_URL : `http://${process.env.HOST}:${getPort}`}`);
+        let serverUrl = buildServerUrl(getPort);
+
+        if (config.ngrok && config.ngrok.enabled) {
+            try {
+                const ngrok = require('ngrok');
+                const tunnelOptions = {
+                    addr: getPort,
+                    proto: 'http'
+                };
+
+                if (config.ngrok.authToken) {
+                    tunnelOptions.authtoken = config.ngrok.authToken;
+                }
+
+                if (config.ngrok.domain) {
+                    tunnelOptions.domain = config.ngrok.domain;
+                }
+
+                if (config.ngrok.region) {
+                    tunnelOptions.region = config.ngrok.region;
+                }
+
+                const ngrokUrl = await ngrok.connect(tunnelOptions);
+                global.BASE_URL = ngrokUrl;
+                serverUrl = ngrokUrl;
+                console.log(`Ngrok tunnel established at ${ngrokUrl}`);
+            } catch (ngrokError) {
+                console.error('Failed to start ngrok tunnel', ngrokError);
+            }
+        }
+
+        console.log(`${config.app.project_name} is running on ${serverUrl}`);
     } catch (error) {
         console.error(error);
     }

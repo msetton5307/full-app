@@ -33,6 +33,24 @@ DB_DATABASE=sysaving
 
 After running the command, log in at `/admin/login` with the credentials printed by the script.
 
+## Expose the admin panel over ngrok
+
+To make the admin API reachable from external devices (for example, when testing the mobile app against a local backend), enable the built-in ngrok tunnel.
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Add these values to your `.env` file:
+   ```
+   NGROK_ENABLED=true
+   NGROK_AUTHTOKEN=<your-ngrok-authtoken>
+   # Optional overrides
+   # NGROK_DOMAIN=custom-subdomain.ngrok.dev
+   # NGROK_REGION=us
+   ```
+3. Start the server as usual (`npm start` or `npm run dev`). The console will print the public ngrok URL. Use that URL in the mobile app configuration to reach the admin API.
+
 ## Add your files
 
 - [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
