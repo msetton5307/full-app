@@ -12,6 +12,18 @@ const normalizePrivateKey = (rawKey) => {
     return unquotedKey.replace(/\\n/g, '\n');
 };
 
+const decodeBase64PrivateKey = (rawKey) => {
+    if (!rawKey) return null;
+
+    try {
+        const decoded = Buffer.from(rawKey, 'base64').toString('utf8');
+        return normalizePrivateKey(decoded);
+    } catch (error) {
+        console.error('[NotificationHelper] Failed to decode FIREBASE_PRIVATE_KEY_BASE64 env var:', error);
+        return null;
+    }
+};
+
 const parseServiceAccountFromJsonEnv = () => {
     const rawJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
     if (!rawJson) return null;
@@ -42,16 +54,19 @@ const resolveServiceAccount = () => {
     if (envJsonAccount) return envJsonAccount;
 
     const envPrivateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const envPrivateKeyBase64 = process.env.FIREBASE_PRIVATE_KEY_BASE64;
     const envClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const envProjectId = process.env.FIREBASE_PROJECT_ID;
     const configuredServiceAccountPath = process.env.FIREBASE_CREDENTIALS_PATH;
 
-    if (envPrivateKey && envClientEmail && envProjectId) {
+    const resolvedPrivateKey = normalizePrivateKey(envPrivateKey) || decodeBase64PrivateKey(envPrivateKeyBase64);
+
+    if (resolvedPrivateKey && envClientEmail && envProjectId) {
         return {
             type: 'service_account',
             project_id: envProjectId,
             private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || undefined,
-            private_key: normalizePrivateKey(envPrivateKey),
+            private_key: resolvedPrivateKey,
             client_email: envClientEmail,
             client_id: process.env.FIREBASE_CLIENT_ID || undefined,
             auth_uri: 'https://accounts.google.com/o/oauth2/auth',
