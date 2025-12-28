@@ -21,6 +21,7 @@ module.exports = {
                 password: process.env.DB_PASSWORD || '',
                 username: process.env.DB_USERNAME || '',
                 host: process.env.DB_HOST || '127.0.0.1',
+                uri: process.env.DB_URI || '',
                 authSource: process.env.DB_AUTH_SOURCE || '',
                 dialect: 'mongodb'
         },
