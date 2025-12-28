@@ -2,12 +2,14 @@ const fs = require('fs');
 const path = require("path")
 let firebase_admin = require('firebase-admin');
 
-const defaultServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json');
+const defaultServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-aeb337580e7d.json');
+const legacyServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json');
 
 const resolveServiceAccount = () => {
     const envPrivateKey = process.env.FIREBASE_PRIVATE_KEY;
     const envClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const envProjectId = process.env.FIREBASE_PROJECT_ID;
+    const configuredServiceAccountPath = process.env.FIREBASE_CREDENTIALS_PATH;
 
     if (envPrivateKey && envClientEmail && envProjectId) {
         return {
@@ -25,13 +27,25 @@ const resolveServiceAccount = () => {
         };
     }
 
-    if (fs.existsSync(defaultServiceAccountPath)) {
+    const candidatePaths = [
+        configuredServiceAccountPath,
+        defaultServiceAccountPath,
+        legacyServiceAccountPath
+    ].filter(Boolean);
+
+    for (const accountPath of candidatePaths) {
+        if (!fs.existsSync(accountPath)) {
+            continue;
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fileAccount = require(defaultServiceAccountPath);
-        return {
-            ...fileAccount,
-            private_key: fileAccount.private_key?.replace(/\\n/g, '\n')
-        };
+        const fileAccount = require(accountPath);
+        if (fileAccount?.private_key) {
+            return {
+                ...fileAccount,
+                private_key: fileAccount.private_key.replace(/\\n/g, '\n')
+            };
+        }
     }
 
     return null;
