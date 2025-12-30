@@ -19,6 +19,9 @@ import {
   applyDealFavorite,
   applyDealLiked,
   getDealDetails,
+  reportDealExpired,
+  trackDealCtaClick,
+  trackDealView,
 } from '@app/utils/service/UserService';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Css from '@app/themes/Css';
@@ -194,11 +197,42 @@ const ProductCard = ({
     [currentDealId, item?.Name, item?.deal_title, productDetails?.title],
   );
 
+  const recordDealView = useCallback(
+    async (dealId: string) => {
+      if (!dealId) {
+        return;
+      }
+
+      try {
+        await dispatch(trackDealView({dealId}));
+      } catch (error) {
+        console.log('Error recording deal view', error);
+      }
+    },
+    [dispatch],
+  );
+
+  const recordDealCtaClick = useCallback(
+    async (dealId: string) => {
+      if (!dealId) {
+        return;
+      }
+
+      try {
+        await dispatch(trackDealCtaClick({dealId}));
+      } catch (error) {
+        console.log('Error recording deal CTA click', error);
+      }
+    },
+    [dispatch],
+  );
+
   const getProductDetails = useCallback(
     async (item: any) => {
       if (jsonData) {
+        const dealId = item?._id || item?.id;
         setProductDetails({
-          _id: item?._id || item?.id,
+          _id: dealId,
           brand_logo: item?.brand_logo || '',
           deal_price: item?.Price2 || '',
           description: '',
@@ -219,6 +253,8 @@ const ProductCard = ({
         trackDealEvent('deal_card_opened', {
           source: jsonData ? 'json_listing' : 'deal_listing',
         });
+
+        recordDealView(dealId);
       } else {
         try {
           const result = await dispatch(
@@ -228,13 +264,14 @@ const ProductCard = ({
           );
           console.log('getProductDetails result_details', result);
           if (result.success) {
+            const dealId = result.data?._id;
             setIsVisible(true);
             onModalOpen?.();
             trackDealEvent('deal_card_opened', {
               source: jsonData ? 'json_listing' : 'deal_listing',
             });
             setProductDetails({
-              _id: result.data?._id,
+              _id: dealId,
               brand_logo: item?.brand_logo
                 ? `${IMAGES_BUCKET_URL.brand}${item?.brand_logo}`
                 : '',
@@ -254,13 +291,15 @@ const ProductCard = ({
               title: item?.deal_title || '',
               isJson: false,
             });
+
+            recordDealView(dealId);
           }
         } catch (error) {
           console.log('Error', error);
         }
       }
     },
-    [dispatch, jsonData, item, onModalOpen, trackDealEvent],
+    [dispatch, jsonData, item, onModalOpen, recordDealView, trackDealEvent],
   );
 
   useEffect(() => {
@@ -271,6 +310,11 @@ const ProductCard = ({
 
   const handleLikeDislike = useCallback(
     async (id: string, action: 'like' | 'dislike', currentState: boolean) => {
+      if (!id) {
+        showMessage('Unable to update this deal right now.');
+        return;
+      }
+
       try {
         const result = await dispatch(
           applyDealLiked({
@@ -308,6 +352,7 @@ const ProductCard = ({
       trackDealEvent('deal_link_clicked', {
         link,
       });
+      recordDealCtaClick(currentDealId);
       Linking.openURL(link).catch(err =>
         console.error('Error opening link:', err),
       );
@@ -316,6 +361,11 @@ const ProductCard = ({
 
   const handleFavourite = useCallback(
     async (id: string, isFavourite: boolean) => {
+      if (!id) {
+        showMessage('Unable to update this deal right now.');
+        return;
+      }
+
       try {
         const result = await dispatch(applyDealFavorite({dealId: id}));
         if (result.success) {
@@ -342,15 +392,22 @@ const ProductCard = ({
 
     try {
       setIsReportingExpired(true);
+      const response = await dispatch(
+        reportDealExpired({dealId: currentDealId}),
+      );
       trackDealEvent('deal_report_expired');
-      showMessage('Thanks for letting us know this deal is expired.');
+      if (response?.success) {
+        showMessage('Thanks for letting us know this deal is expired.');
+      } else {
+        showMessage(response?.message || 'Unable to report this deal.');
+      }
     } catch (error) {
       console.log('Error reporting expired deal', error);
       showMessage('Unable to report this deal. Please try again.');
     } finally {
       setIsReportingExpired(false);
     }
-  }, [currentDealId, trackDealEvent]);
+  }, [currentDealId, dispatch, trackDealEvent]);
 
   const share = async (data: ViewProductDetails) => {
     try {
@@ -380,6 +437,7 @@ const ProductCard = ({
   const modalImage = productDetails?.image || (details?.images as string);
   const modalProductLink = productDetails?.product_link || details?.product_link;
   const modalBrandLogo = productDetails?.brand_logo || details?.brand_logo;
+  const hasDealId = Boolean(currentDealId);
 
   return (
     <>
@@ -568,9 +626,16 @@ const ProductCard = ({
                   <Text style={styles.detailsDescLabel}>Description</Text>
                   <Text style={styles.detailsDescValue}>{modalDescription}</Text>
                 </View>
-                <View style={[Css.w100, !productDetails?.isJson && Css.mt20]}>
-                  <View style={[Css.fdr, Css.jcc, Css.aic, Css.g2]}>
-                    {!productDetails.isJson && (
+                <View style={[Css.w100, Css.mt20]}>
+                  <View
+                    style={[
+                      Css.fdr,
+                      Css.jcc,
+                      Css.aic,
+                      Css.g2,
+                      styles.actionRow,
+                    ]}>
+                    {hasDealId && (
                       <>
                         <TouchableOpacity
                           onPress={() =>
@@ -580,6 +645,7 @@ const ProductCard = ({
                               productDetails.isLike,
                             )
                           }
+                          disabled={!hasDealId}
                           style={Css.iconContainer32}>
                           <Image
                             style={Css.icon32}
@@ -598,6 +664,7 @@ const ProductCard = ({
                               productDetails?.isDislike,
                             )
                           }
+                          disabled={!hasDealId}
                           style={Css.iconContainer32}>
                           <Image
                             style={Css.icon32}
@@ -638,6 +705,7 @@ const ProductCard = ({
                           );
                           onUnFavorite();
                         }}
+                        disabled={!hasDealId}
                         style={Css.iconContainer32}>
                         <Image
                           style={Css.icon32}
@@ -649,15 +717,16 @@ const ProductCard = ({
                         />
                       </TouchableOpacity>
                     )}
+
+                    <CustomButtonOutline
+                      label="Report expired"
+                      onPress={handleReportExpired}
+                      loading={isReportingExpired}
+                      disabled={isReportingExpired}
+                      containerStyle={[styles.reportExpiredButton]}
+                      labelStyle={styles.reportExpiredLabel}
+                    />
                   </View>
-                  <View style={Css.mb20} />
-                  <CustomButtonOutline
-                    label="Report expired"
-                    onPress={handleReportExpired}
-                    loading={isReportingExpired}
-                    disabled={isReportingExpired}
-                    containerStyle={Css.w100}
-                  />
                 </View>
               </ScrollView>
               <CustomButtonSolid
@@ -820,6 +889,9 @@ const styles = StyleSheet.create({
     elevation: 5,
     backgroundColor: Colors.white,
   },
+  actionRow: {
+    flexWrap: 'wrap',
+  },
   productHeroContainer: {
     width: '100%',
     backgroundColor: Colors.white,
@@ -842,6 +914,17 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: Fonts.PoppinsMedium,
     fontSize: moderateScale(11),
+  },
+  reportExpiredButton: {
+    width: 'auto',
+    minWidth: moderateScale(140),
+    height: moderateScale(36),
+    paddingHorizontal: moderateScale(12),
+    marginTop: 0,
+    alignSelf: 'center',
+  },
+  reportExpiredLabel: {
+    fontSize: moderateScale(12),
   },
   productDeatilsLogoContainer: {
     borderRadius: moderateScale(50),

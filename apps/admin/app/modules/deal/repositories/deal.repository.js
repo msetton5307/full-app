@@ -42,6 +42,45 @@ const DealRepo = {
     }
   },
 
+  incrementClickCount: async (dealId) => {
+    try {
+      return await DealModel.findOneAndUpdate(
+        { _id: dealId, isDeleted: false },
+        { $inc: { clickCount: 1 } },
+        { new: true },
+      ).lean();
+    } catch (e) {
+      throw (e);
+    }
+  },
+
+  incrementCtaClickCount: async (dealId) => {
+    try {
+      return await DealModel.findOneAndUpdate(
+        { _id: dealId, isDeleted: false },
+        { $inc: { ctaClickCount: 1 } },
+        { new: true },
+      ).lean();
+    } catch (e) {
+      throw (e);
+    }
+  },
+
+  incrementExpiredReports: async (dealId) => {
+    try {
+      return await DealModel.findOneAndUpdate(
+        { _id: dealId, isDeleted: false },
+        {
+          $inc: { expiredReports: 1 },
+          $set: { isExpiredReported: true },
+        },
+        { new: true },
+      ).lean();
+    } catch (e) {
+      throw (e);
+    }
+  },
+
   getDistinctDocument: async (field, params) => {
     try {
       let datas = await DealModel.distinct(field, params);
