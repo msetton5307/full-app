@@ -165,7 +165,7 @@ const ProductCard = ({
     async (item: any) => {
       if (jsonData) {
         setProductDetails({
-          _id: item?._id,
+          _id: item?._id || item?.id,
           brand_logo: item?.brand_logo || '',
           deal_price: item?.Price2 || '',
           description: '',
