@@ -50,7 +50,7 @@ const getTabBarIcon = (
         style={[
           styles.iconStyle,
           {
-            tintColor: focused ? Colors.Aztec_Gold : Colors.Old_Silver,
+            tintColor: focused ? 'black' : undefined,
           },
         ]}
         source={item?.Icon}
