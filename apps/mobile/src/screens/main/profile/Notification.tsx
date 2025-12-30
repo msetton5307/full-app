@@ -49,6 +49,8 @@ const Notification = () => {
     <GeneralTemplate
       enableBack
       isSearch={false}
+      useBackgroundImage={false}
+      backgroundColor={Colors.white}
       fixedComponent={<Text style={styles.textStyle}>Notification</Text>}>
       <View style={[Css.w100, Css.g8]}>
         {/* <NotificationPanel label={'Posted Deal Notification'} /> */}
