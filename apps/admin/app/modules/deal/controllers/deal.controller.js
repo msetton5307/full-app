@@ -34,7 +34,44 @@ class DealController {
       }
 
       let data = await DealRepo.getStats(req);
-      const dashboardDeals = await DealRepo.getAllWithMetrics();
+      let dashboardDeals = [];
+
+      try {
+        const { data: responseData } = await axios.get(`${SYSAVINGS_API_BASE_URL}/api/mergeJSON/paginated`, {
+          params: { page: 1, limit: 12 },
+        });
+
+        const dealsFromApi = responseData?.data || responseData?.results || responseData;
+        const deals = Array.isArray(dealsFromApi) ? dealsFromApi : [];
+
+        const buildImageUrl = (path) => {
+          if (!path) return null;
+          if (/^https?:\/\//i.test(path)) return path;
+          return `${SYSAVINGS_API_BASE_URL}${path}`;
+        };
+
+        dashboardDeals = deals.map((item, index) => {
+          const dealTitle = item.Name || item.title || item.deal_title || "";
+          const productLink = item.URL || item.Url || item.url || item.product_link || item.productLink || "";
+          const primaryImage = buildImageUrl(item.Image || item.image || item.imageUrl);
+
+          return {
+            _id: item._id || item.id || item.Id || item.ID || `dashboard-${index}`,
+            deal_title: dealTitle,
+            product_link: productLink,
+            primaryImage,
+            status: item.status || "Approved",
+            discount: item.Off || item.off || item.discount || "",
+            clickCount: item.clickCount || 0,
+            ctaClickCount: item.ctaClickCount || 0,
+            expiredReports: item.expiredReports || 0,
+            likes: item.likes || 0,
+            dislikes: item.dislikes || 0,
+          };
+        });
+      } catch (apiError) {
+        console.log("[Deal Dashboard] Failed to fetch deals from SYSAVINGS API", apiError);
+      }
       res.render("deal/views/list", {
         page_name: "deal-management",
         page_title: "Deal List",
