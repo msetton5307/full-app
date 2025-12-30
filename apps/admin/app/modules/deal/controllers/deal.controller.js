@@ -34,13 +34,31 @@ class DealController {
       }
 
       let data = await DealRepo.getStats(req);
+      const dashboardDeals = await DealRepo.getAllWithMetrics();
       res.render("deal/views/list", {
         page_name: "deal-management",
         page_title: "Deal List",
         user: req.user,
         status,
         data,
+        dashboardDeals,
       });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  async markExpired(req, res) {
+    try {
+      const dealId = req.params.id;
+      await DealRepo.updateById(
+        { status: 'Expired', isExpired: true, isExpiredReported: false, expiredReports: 0 },
+        dealId
+      );
+
+      req.flash('success', 'Deal marked as expired.');
+      return res.redirect(namedRouter.urlFor('admin.deal.listing'));
     } catch (err) {
       console.log(err);
       throw err;
