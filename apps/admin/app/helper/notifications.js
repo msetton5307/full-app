@@ -5,6 +5,15 @@ let firebase_admin = require('firebase-admin');
 const defaultServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-aeb337580e7d.json');
 const legacyServiceAccountPath = path.join(__dirname, 'key_file', 'sysavings-5ad56-firebase-adminsdk-fbsvc-75b87acc2f.json');
 const oauthPlistPath = process.env.FIREBASE_OAUTH_PLIST_PATH;
+const configuredServiceAccountPath = process.env.FIREBASE_CREDENTIALS_PATH;
+const applicationDefaultCredentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const envPrivateKey = process.env.FIREBASE_PRIVATE_KEY;
+const envPrivateKeyBase64 = process.env.FIREBASE_PRIVATE_KEY_BASE64;
+const envClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const envProjectId = process.env.FIREBASE_PROJECT_ID;
+const envPrivateKeyId = process.env.FIREBASE_PRIVATE_KEY_ID;
+const envClientId = process.env.FIREBASE_CLIENT_ID;
+const envClientX509CertUrl = process.env.FIREBASE_CLIENT_X509_CERT_URL;
 
 const normalizePrivateKey = (rawKey) => {
     if (!rawKey) return rawKey;
@@ -87,26 +96,20 @@ const resolveServiceAccount = () => {
     const envJsonAccount = parseServiceAccountFromJsonEnv();
     if (envJsonAccount) return envJsonAccount;
 
-    const envPrivateKey = process.env.FIREBASE_PRIVATE_KEY;
-    const envPrivateKeyBase64 = process.env.FIREBASE_PRIVATE_KEY_BASE64;
-    const envClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const envProjectId = process.env.FIREBASE_PROJECT_ID;
-    const configuredServiceAccountPath = process.env.FIREBASE_CREDENTIALS_PATH;
-
     const resolvedPrivateKey = normalizePrivateKey(envPrivateKey) || decodeBase64PrivateKey(envPrivateKeyBase64);
 
     if (resolvedPrivateKey && envClientEmail && envProjectId) {
         return {
             type: 'service_account',
             project_id: envProjectId,
-            private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || undefined,
+            private_key_id: envPrivateKeyId || undefined,
             private_key: resolvedPrivateKey,
             client_email: envClientEmail,
-            client_id: process.env.FIREBASE_CLIENT_ID || undefined,
+            client_id: envClientId || undefined,
             auth_uri: 'https://accounts.google.com/o/oauth2/auth',
             token_uri: 'https://oauth2.googleapis.com/token',
             auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-            client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL || undefined,
+            client_x509_cert_url: envClientX509CertUrl || undefined,
             universe_domain: 'googleapis.com'
         };
     }
@@ -138,9 +141,62 @@ const resolveServiceAccount = () => {
 const serviceAccount = resolveServiceAccount();
 const oauthCredential = resolveOAuthRefreshTokenCredential();
 
+const credentialGuidance = 'Set FIREBASE_SERVICE_ACCOUNT_JSON, FIREBASE_PRIVATE_KEY/FIREBASE_CLIENT_EMAIL/FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS_PATH, or GOOGLE_APPLICATION_CREDENTIALS before attempting to send push notifications.';
+
+const validateCredentialsPresence = () => {
+    const hasApplicationDefault = Boolean(applicationDefaultCredentialsPath);
+    const hasPartialServiceAccountEnv = Boolean(envPrivateKey || envPrivateKeyBase64 || envClientEmail || envProjectId);
+    const hasPartialOauthEnv = Boolean(process.env.FIREBASE_OAUTH_REFRESH_TOKEN || process.env.FIREBASE_OAUTH_CLIENT_SECRET || process.env.FIREBASE_OAUTH_CLIENT_ID || oauthPlistPath);
+
+    const invalidPathMessages = [];
+
+    if (configuredServiceAccountPath && !fs.existsSync(configuredServiceAccountPath)) {
+        invalidPathMessages.push(`FIREBASE_CREDENTIALS_PATH is set to "${configuredServiceAccountPath}" but the file could not be found.`);
+    }
+
+    if (applicationDefaultCredentialsPath && !fs.existsSync(applicationDefaultCredentialsPath)) {
+        invalidPathMessages.push(`GOOGLE_APPLICATION_CREDENTIALS is set to "${applicationDefaultCredentialsPath}" but the file could not be found.`);
+    }
+
+    if (invalidPathMessages.length) {
+        throw new Error(`[NotificationHelper] ${invalidPathMessages.join(' ')} ${credentialGuidance}`);
+    }
+
+    if (serviceAccount || oauthCredential || hasApplicationDefault) {
+        if (serviceAccount) {
+            return;
+        }
+
+        if (oauthCredential) {
+            return;
+        }
+
+        // Application default credentials are present (and path exists if provided).
+        return;
+    }
+
+    const missingMessages = [];
+
+    if (hasPartialServiceAccountEnv) {
+        missingMessages.push('Service account environment variables are incomplete; provide FIREBASE_PRIVATE_KEY (or FIREBASE_PRIVATE_KEY_BASE64), FIREBASE_CLIENT_EMAIL, and FIREBASE_PROJECT_ID together or supply FIREBASE_SERVICE_ACCOUNT_JSON/FIREBASE_CREDENTIALS_PATH.');
+    }
+
+    if (hasPartialOauthEnv) {
+        missingMessages.push('OAuth refresh token credentials are incomplete; set FIREBASE_OAUTH_REFRESH_TOKEN, FIREBASE_OAUTH_CLIENT_SECRET, and FIREBASE_OAUTH_CLIENT_ID (or FIREBASE_OAUTH_PLIST_PATH).');
+    }
+
+    if (!missingMessages.length) {
+        missingMessages.push('No Firebase credentials were detected.');
+    }
+
+    throw new Error(`[NotificationHelper] ${missingMessages.join(' ')} ${credentialGuidance}`);
+};
+
 let messagingClient = null;
 
 try {
+    validateCredentialsPresence();
+
     if (serviceAccount) {
         firebase_admin.initializeApp({
             credential: firebase_admin.credential.cert(serviceAccount)
@@ -159,11 +215,10 @@ try {
         });
         messagingClient = firebase_admin.messaging();
         console.info('[NotificationHelper] Firebase Admin initialized with application default credentials.');
-    } else {
-        console.warn('[NotificationHelper] Firebase credentials are missing; push notifications are disabled.');
     }
 } catch (error) {
     console.error('[NotificationHelper] Failed to initialize Firebase Admin SDK; push notifications are disabled.', error);
+    throw error;
 }
 
 class NotificationHelper {
