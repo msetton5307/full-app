@@ -60,10 +60,14 @@ const resolveOAuthRefreshTokenCredential = () => {
     }
 
     return {
-        type: 'authorized_user',
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken
+        credential: {
+            type: 'authorized_user',
+            client_id: clientId,
+            client_secret: clientSecret,
+            refresh_token: refreshToken
+        },
+        source: oauthPlistPath ? `OAuth plist (${oauthPlistPath})` : 'OAuth environment variables',
+        metadata: { client_id: clientId }
     };
 };
 
@@ -94,23 +98,41 @@ const parseServiceAccountFromJsonEnv = () => {
 
 const resolveServiceAccount = () => {
     const envJsonAccount = parseServiceAccountFromJsonEnv();
-    if (envJsonAccount) return envJsonAccount;
+    if (envJsonAccount) {
+        return {
+            credential: envJsonAccount,
+            source: 'FIREBASE_SERVICE_ACCOUNT_JSON',
+            metadata: {
+                project_id: envJsonAccount.project_id,
+                client_email: envJsonAccount.client_email
+            }
+        };
+    }
 
     const resolvedPrivateKey = normalizePrivateKey(envPrivateKey) || decodeBase64PrivateKey(envPrivateKeyBase64);
 
     if (resolvedPrivateKey && envClientEmail && envProjectId) {
         return {
-            type: 'service_account',
-            project_id: envProjectId,
-            private_key_id: envPrivateKeyId || undefined,
-            private_key: resolvedPrivateKey,
-            client_email: envClientEmail,
-            client_id: envClientId || undefined,
-            auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-            token_uri: 'https://oauth2.googleapis.com/token',
-            auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-            client_x509_cert_url: envClientX509CertUrl || undefined,
-            universe_domain: 'googleapis.com'
+            credential: {
+                type: 'service_account',
+                project_id: envProjectId,
+                private_key_id: envPrivateKeyId || undefined,
+                private_key: resolvedPrivateKey,
+                client_email: envClientEmail,
+                client_id: envClientId || undefined,
+                auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+                token_uri: 'https://oauth2.googleapis.com/token',
+                auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+                client_x509_cert_url: envClientX509CertUrl || undefined,
+                universe_domain: 'googleapis.com'
+            },
+            source: 'FIREBASE_PRIVATE_KEY/FIREBASE_CLIENT_EMAIL/FIREBASE_PROJECT_ID',
+            metadata: {
+                project_id: envProjectId,
+                client_email: envClientEmail,
+                private_key_id: envPrivateKeyId || undefined,
+                client_id: envClientId || undefined
+            }
         };
     }
 
@@ -125,21 +147,50 @@ const resolveServiceAccount = () => {
             continue;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fileAccount = require(accountPath);
-        if (fileAccount?.private_key) {
-            return {
-                ...fileAccount,
-                private_key: normalizePrivateKey(fileAccount.private_key)
-            };
+        try {
+            fs.accessSync(accountPath, fs.constants.R_OK);
+        } catch (error) {
+            if (accountPath === configuredServiceAccountPath) {
+                console.warn(`[NotificationHelper] FIREBASE_CREDENTIALS_PATH is set to "${configuredServiceAccountPath}" but the file is not readable; continuing to check fallback credentials.`);
+            }
+            continue;
+        }
+
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const fileAccount = require(accountPath);
+            if (fileAccount?.private_key) {
+                const sourceLabel = accountPath === configuredServiceAccountPath
+                    ? `FIREBASE_CREDENTIALS_PATH (${accountPath})`
+                    : `service account file (${accountPath})`;
+
+                return {
+                    credential: {
+                        ...fileAccount,
+                        private_key: normalizePrivateKey(fileAccount.private_key)
+                    },
+                    source: sourceLabel,
+                    metadata: {
+                        project_id: fileAccount.project_id,
+                        client_email: fileAccount.client_email,
+                        private_key_id: fileAccount.private_key_id
+                    }
+                };
+            }
+        } catch (error) {
+            if (accountPath === configuredServiceAccountPath) {
+                console.warn(`[NotificationHelper] FIREBASE_CREDENTIALS_PATH is set to "${configuredServiceAccountPath}" but the file could not be parsed; continuing to check fallback credentials.`);
+            }
         }
     }
 
     return null;
 };
 
-const serviceAccount = resolveServiceAccount();
-const oauthCredential = resolveOAuthRefreshTokenCredential();
+const serviceAccountResolution = resolveServiceAccount();
+const serviceAccount = serviceAccountResolution?.credential;
+const oauthCredentialResolution = resolveOAuthRefreshTokenCredential();
+const oauthCredential = oauthCredentialResolution?.credential;
 
 const credentialGuidance = 'Set FIREBASE_SERVICE_ACCOUNT_JSON, FIREBASE_PRIVATE_KEY/FIREBASE_CLIENT_EMAIL/FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS_PATH, or GOOGLE_APPLICATION_CREDENTIALS before attempting to send push notifications.';
 
@@ -199,6 +250,16 @@ let messagingClient = null;
 
 try {
     validateCredentialsPresence();
+
+    if (serviceAccountResolution) {
+        console.info('[NotificationHelper] Selected service account credentials from', serviceAccountResolution.source, JSON.stringify(serviceAccountResolution.metadata));
+    } else if (oauthCredentialResolution) {
+        console.info('[NotificationHelper] Selected OAuth refresh token credentials from', oauthCredentialResolution.source, JSON.stringify(oauthCredentialResolution.metadata));
+    } else if (applicationDefaultCredentialsPath) {
+        console.info('[NotificationHelper] Selected application default credentials from path', applicationDefaultCredentialsPath);
+    } else {
+        console.info('[NotificationHelper] Selected application default credentials from ambient environment.');
+    }
 
     if (serviceAccount) {
         firebase_admin.initializeApp({
