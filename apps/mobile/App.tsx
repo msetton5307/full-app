@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import StackNavigation from './src/navigators/StackNavigation';
 import * as Sentry from '@sentry/react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -23,6 +23,20 @@ Sentry.init({
 });
 
 const App = () => {
+  const handleNotificationNavigation = useCallback((data?: any) => {
+    const dealId =
+      data?.dealId ||
+      data?.deal_id ||
+      data?.deal?.deal_id ||
+      data?.deal?._id;
+
+    if (dealId) {
+      navigate('TabNav', {screen: 'Deals', params: {dealId: String(dealId)}});
+    } else {
+      navigate('TabNav', {screen: 'Deals'});
+    }
+  }, []);
+
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -68,7 +82,7 @@ const App = () => {
     const unsubscribeForeground = notifee.onForegroundEvent(
       ({type, detail}) => {
         if (type === EventType.PRESS) {
-          navigate('Notification');
+          handleNotificationNavigation(detail?.notification?.data);
         }
       },
     );
@@ -77,7 +91,7 @@ const App = () => {
     const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(
       remoteMessage => {
         console.log('Notification opened from background:', remoteMessage);
-        navigate('Notification');
+        handleNotificationNavigation(remoteMessage?.data);
       },
     );
 
@@ -87,7 +101,7 @@ const App = () => {
       .then(remoteMessage => {
         if (remoteMessage) {
           console.log('Notification opened from quit state:', remoteMessage);
-          navigate('Notification');
+          handleNotificationNavigation(remoteMessage?.data);
         }
       });
 

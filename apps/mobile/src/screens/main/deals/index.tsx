@@ -7,12 +7,15 @@ import {moderateScale, verticalScale} from '../../../utils/orientation';
 import GeneralTemplate from '../../../components/Template/GeneralTemplate';
 import Css from '../../../themes/Css';
 import ProductCard from '../../../components/Template/ProductCard';
-import {useIsFocused} from '@react-navigation/native';
+import {RouteProp, useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {useAppDispatch} from '@app/redux';
 import {getAllDealListing} from '@app/utils/service/UserService';
+import {RootTabParamList} from '@app/types';
 
 const Deals = () => {
   const isFocused = useIsFocused();
+  const route = useRoute<RouteProp<RootTabParamList, 'Deals'>>();
+  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
 
   const [lists, setList] = useState<any[]>([]);
@@ -21,63 +24,111 @@ const Deals = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
   const [isFeatured, setIsFeatured] = useState(0);
+  const [pendingDealId, setPendingDealId] = useState<string | undefined>(
+    route.params?.dealId,
+  );
+  const [autoOpenDealId, setAutoOpenDealId] = useState<string | undefined>(
+    route.params?.dealId,
+  );
 
   useEffect(() => {
     if (isFocused) {
       getAllDeals(1);
     }
-  }, [isFocused]);
+  }, [getAllDeals, isFocused]);
+
+  useEffect(() => {
+    if (route.params?.dealId) {
+      setPendingDealId(String(route.params?.dealId));
+    }
+  }, [route.params?.dealId]);
+
+  useEffect(() => {
+    if (!pendingDealId) {
+      return;
+    }
+
+    const hasDeal = lists.some(
+      item =>
+        String(item?._id) === pendingDealId ||
+        String(item?.deal_id) === pendingDealId,
+    );
+
+    if (hasDeal) {
+      setAutoOpenDealId(pendingDealId);
+    } else if (!isLoading && hasMoreData && lists.length > 0) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      getAllDeals(nextPage);
+    } else if (!isLoading && !hasMoreData) {
+      navigation.navigate('DealDetails', {dealId: pendingDealId});
+      navigation.setParams?.({dealId: undefined});
+      setPendingDealId(undefined);
+      setAutoOpenDealId(undefined);
+    }
+  }, [
+    pendingDealId,
+    lists,
+    isLoading,
+    hasMoreData,
+    navigation,
+    page,
+    getAllDeals,
+  ]);
 
   const keyExtractor = useCallback(
     (item: any, index: number) => index.toString(),
     [],
   );
 
-  const getAllDeals = async (
-    _page: number,
-    isFeature = isFeatured,
-    searchQuery = search,
-  ) => {
-    if (_page === 1) {
-      setPage(1);
-      setHasMoreData(true);
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await dispatch(
-        getAllDealListing({
-          length: 6,
-          page: _page,
-          search: searchQuery,
-          isFeature: isFeature === 1,
-        }),
-      );
-
-      if (result.success) {
-        if (_.isEmpty(result.data)) {
-          setHasMoreData(false);
-          if (_page === 1) {
-            setList([]);
-          }
-        } else if (_page === 1) {
-          setList(result.data);
-        } else {
-          setList(prev => [...prev, ...result.data]);
-        }
+  const getAllDeals = useCallback(
+    async (
+      _page: number,
+      isFeature = isFeatured,
+      searchQuery = search,
+    ) => {
+      if (_page === 1) {
+        setPage(1);
+        setHasMoreData(true);
       }
-    } catch (error) {
-      console.log('Error in handleSignIn:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+      setIsLoading(true);
+      try {
+        const result = await dispatch(
+          getAllDealListing({
+            length: 6,
+            page: _page,
+            search: searchQuery,
+            isFeature: isFeature === 1,
+          }),
+        );
+
+        if (result.success) {
+          if (_.isEmpty(result.data)) {
+            setHasMoreData(false);
+            if (_page === 1) {
+              setList([]);
+            }
+          } else if (_page === 1) {
+            setList(result.data);
+          } else {
+            setList(prev => [...prev, ...result.data]);
+          }
+        }
+      } catch (error) {
+        console.log('Error in handleSignIn:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [dispatch, isFeatured, search],
+  );
 
   const debouncedSearch = useCallback(
     _.debounce(query => {
       getAllDeals(1, isFeatured, query);
     }, 500),
-    [isFeatured],
+    [getAllDeals, isFeatured],
   );
 
   const HeaderComponent = useCallback(() => {
@@ -134,9 +185,27 @@ const Deals = () => {
         showsVerticalScrollIndicator={false}
         data={lists}
         keyExtractor={keyExtractor}
-        renderItem={({item, index}) => (
-          <ProductCard enableModal={true} item={item} key={index} jsonData={false}/>
-        )}
+        renderItem={({item, index}) => {
+          const shouldAutoOpen =
+            autoOpenDealId &&
+            (String(item?._id) === autoOpenDealId ||
+              String(item?.deal_id) === autoOpenDealId);
+
+          return (
+            <ProductCard
+              enableModal={true}
+              item={item}
+              key={index}
+              jsonData={false}
+              autoOpenModal={!!shouldAutoOpen}
+              onModalOpen={() => {
+                setAutoOpenDealId(undefined);
+                setPendingDealId(undefined);
+                navigation.setParams?.({dealId: undefined});
+              }}
+            />
+          );
+        }}
         numColumns={2}
         ListEmptyComponent={<Text style={style.empty}>{`No data found.`}</Text>}
         contentContainerStyle={style.flatcontainer}

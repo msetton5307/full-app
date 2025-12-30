@@ -95,11 +95,9 @@ const NotificationPanel = ({data}: {data: any}) => {
       item?.deal?._id ||
       item?._id;
     if (dealId) {
-      navigation.navigate('DealDetails', {
-        dealId: String(dealId),
-        image: getImageUri(item),
-        title: item?.notification_title,
-        description: item?.notification_description,
+      navigation.navigate('TabNav', {
+        screen: 'Deals',
+        params: {dealId: String(dealId)},
       });
     }
   };
