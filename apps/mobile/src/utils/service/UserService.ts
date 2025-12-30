@@ -1,7 +1,7 @@
 import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 import { instance } from '../server/instance';
-import { API, DEALS_BASE_URL } from '../constants';
+import { API, API_BASE_URL, DEALS_BASE_URL } from '../constants';
 import { createFrom } from '../helper/Validation';
 import { setUserInfo } from '../../redux/slice/user.slice';
 import {
@@ -25,6 +25,7 @@ const _header = {
 };
 
 const dealsBaseConfig = { baseURL: DEALS_BASE_URL };
+const dealActionsBaseConfig = { baseURL: API_BASE_URL };
 
 const getUserDetails = () => {
   return async (dispatch: Dispatch) => {
@@ -306,7 +307,7 @@ const getDealFavoriteList = (payload: DEAL_LISTING_TYPE) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealFavoriteList,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
       const { status, data } = result;
       const allDeals = data.data.docs.flatMap((item: any) => item.deals || []);
@@ -332,7 +333,7 @@ const applyDealLiked = (payload: DEAL_LIKE_TYPE) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealLike,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -359,7 +360,7 @@ const applyDealFavorite = (payload: { dealId: string }) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealFavorite,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -387,7 +388,7 @@ const trackDealView = (payload: { dealId: string }) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealView,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -413,7 +414,7 @@ const trackDealCtaClick = (payload: { dealId: string }) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealCtaClick,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -439,7 +440,7 @@ const reportDealExpired = (payload: { dealId: string }) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.reportExpired,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -466,7 +467,7 @@ const addNewDeal = (payload: FormData) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.addDeal,
         payload,
-        { ..._header, ...dealsBaseConfig },
+        { ..._header, ...dealActionsBaseConfig },
       );
 
       const { status, data } = result;
@@ -492,7 +493,7 @@ const getPostedDeal = (payload: DEAL_LISTING_TYPE) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.postedDeals,
         payload,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -520,7 +521,7 @@ const updateDeal = (payload: FormData) => {
       const result: AxiosResponse<any> = await instance.put(
         listing.updateDeal,
         payload,
-        { ..._header, ...dealsBaseConfig },
+        { ..._header, ...dealActionsBaseConfig },
       );
 
       const { status, data } = result;
@@ -546,7 +547,7 @@ const deleteDeal = (id: string) => {
     try {
       const result: AxiosResponse<any> = await instance.delete(
         `${listing.deleteDeal}/${id}`,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
       const { status, data } = result;
       return {
@@ -564,7 +565,7 @@ const addBank = (payload: null) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
         listing.addBank,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
       const { status, data } = result;
       return {
@@ -583,7 +584,7 @@ const getbankDetails = (payload: null) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
         listing.banklist,
-        dealsBaseConfig,
+        dealActionsBaseConfig,
       );
       const { status, data } = result;
       return {
