@@ -121,7 +121,7 @@ const NotificationPanel = ({data}: {data: any}) => {
               onPress={() => handlePress(item)}>
               <View style={styles.leftIconContainer}>
                 <Image
-                  resizeMode="cover"
+                  resizeMode="contain"
                   style={styles.leftIconImage}
                   source={
                     uri
@@ -251,9 +251,10 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(5),
   },
   leftIconImage: {
-    height: '100%',
-    width: '100%',
+    height: '90%',
+    width: '90%',
     borderRadius: moderateScale(70),
+    alignSelf: 'center',
   },
   rightIconContainer: {
     height: moderateScale(50),
