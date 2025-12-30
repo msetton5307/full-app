@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import GeneralTemplate from '../../../components/Template/GeneralTemplate';
 import Css from '../../../themes/Css';
@@ -7,7 +7,11 @@ import {moderateScale, verticalScale} from '../../../utils/orientation';
 import {useAppDispatch} from '@app/redux';
 import {notification} from '@app/utils/service/UserService';
 import {IMAGES_BUCKET_URL} from '@app/utils/constants';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {RootStackParamList} from '@app/types';
 
 const Notification = () => {
@@ -16,24 +20,31 @@ const Notification = () => {
 
   const [data, setData] = useState<any>([]);
 
-  useEffect(() => {
-    handlenotification();
-  }, []);
-
-  async function handlenotification() {
+  const handlenotification = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await dispatch(notification(null));
       console.log(result, 'result');
 
-      setIsLoading(false);
       if (result?.success) {
         setData(result?.data);
       }
     } catch (error) {
       console.log('Error in handleSignIn:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  }, [dispatch]);
+
+  useEffect(() => {
+    handlenotification();
+  }, [handlenotification]);
+
+  useFocusEffect(
+    useCallback(() => {
+      handlenotification();
+    }, [handlenotification]),
+  );
   return (
     <GeneralTemplate
       enableBack
@@ -78,7 +89,11 @@ const NotificationPanel = ({data}: {data: any}) => {
 
   const handlePress = (item: any) => {
     const dealId =
-      item?.dealId || item?.deal_id || item?._id || item?.deal?._id;
+      item?.dealId ||
+      item?.deal_id ||
+      item?.deal?.deal_id ||
+      item?.deal?._id ||
+      item?._id;
     if (dealId) {
       navigation.navigate('DealDetails', {
         dealId: String(dealId),
