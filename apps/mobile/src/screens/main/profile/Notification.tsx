@@ -1,12 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import GeneralTemplate from '../../../components/Template/GeneralTemplate';
 import Css from '../../../themes/Css';
-import {Colors, Fonts, Icons} from '../../../themes';
+import {Colors, Fonts, Icons, Images} from '../../../themes';
 import {moderateScale, verticalScale} from '../../../utils/orientation';
 import {useAppDispatch} from '@app/redux';
 import {notification} from '@app/utils/service/UserService';
 import {IMAGES_BUCKET_URL} from '@app/utils/constants';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '@app/types';
 
 const Notification = () => {
   const dispatch = useAppDispatch();
@@ -51,6 +53,41 @@ const Notification = () => {
 };
 
 const NotificationPanel = ({data}: {data: any}) => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const getImageUri = useMemo(
+    () =>
+      (item: any) => {
+        const dealImage =
+          item?.notification_image ||
+          item?.deal?.images?.[0]?.image ||
+          item?.deal?.image ||
+          item?.images?.[0]?.image;
+
+        if (!dealImage) {
+          return undefined;
+        }
+
+        const isAbsolute = item?.isWeb || dealImage?.startsWith('http');
+        return isAbsolute
+          ? dealImage
+          : `${IMAGES_BUCKET_URL.deals}${dealImage}`;
+      },
+    [],
+  );
+
+  const handlePress = (item: any) => {
+    const dealId =
+      item?.dealId || item?.deal_id || item?._id || item?.deal?._id;
+    if (dealId) {
+      navigation.navigate('DealDetails', {
+        dealId: String(dealId),
+        image: getImageUri(item),
+        title: item?.notification_title,
+        description: item?.notification_description,
+      });
+    }
+  };
 
   return (
     <>
@@ -59,22 +96,26 @@ const NotificationPanel = ({data}: {data: any}) => {
       </View>
       <View style={styles.dataContainer}>
         {data?.notificationListing?.map((item: any, index: number) => {
+          const uri = getImageUri(item);
           return (
-            <View
+            <TouchableOpacity
+              activeOpacity={0.8}
               style={[
                 styles.rowContainer,
                 index === 0 ? {borderTopWidth: moderateScale(0)} : {},
               ]}
-              key={index}>
+              key={index}
+              onPress={() => handlePress(item)}>
               <View style={styles.leftIconContainer}>
                 <Image
                   resizeMode="contain"
                   style={Css.icon50}
-                  source={{
-                    uri: item?.isWeb
-                      ? item?.notification_image
-                      : `${IMAGES_BUCKET_URL.deals}${item?.notification_image}`,
-                  }}
+                  source={
+                    uri
+                      ? {uri}
+                      : Images.no_pictures
+                  }
+                  tintColor={uri ? undefined : Colors.gray_1}
                 />
               </View>
               <View style={[Css.f1]}>
@@ -119,7 +160,7 @@ const NotificationPanel = ({data}: {data: any}) => {
               {item?.marked_as_read == false ? (
                 <View style={styles.activeDot} />
               ) : null}
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>

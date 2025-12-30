@@ -6,6 +6,14 @@ export type RootStackParamList = {
   Signup: undefined;
   CategoryKeyword: undefined;
   TabNav: NavigatorScreenParams<RootTabParamList> | undefined;
+  DealDetails:
+    | {
+        dealId: string;
+        image?: string;
+        title?: string;
+        description?: string;
+      }
+    | undefined;
   Profile: undefined;
   EditProfile: undefined;
   Payout: undefined;
