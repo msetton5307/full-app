@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useCallback, useEffect, useState} from 'react';
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, Text, View} from 'react-native';
 import _ from 'lodash';
 import {Colors, Fonts} from '../../../themes';
 import {moderateScale, verticalScale} from '../../../utils/orientation';
@@ -9,7 +9,7 @@ import Css from '../../../themes/Css';
 import ProductCard from '../../../components/Template/ProductCard';
 import {RouteProp, useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {useAppDispatch} from '@app/redux';
-import {getAllDealListing} from '@app/utils/service/UserService';
+import {getMergedJsonDeals} from '@app/utils/service/UserService';
 import {RootTabParamList} from '@app/types';
 
 const Deals = () => {
@@ -23,7 +23,6 @@ const Deals = () => {
   const [page, setPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const [isFeatured, setIsFeatured] = useState(0);
   const [pendingDealId, setPendingDealId] = useState<string | undefined>(
     route.params?.dealId,
   );
@@ -48,11 +47,12 @@ const Deals = () => {
       return;
     }
 
-    const hasDeal = lists.some(
-      item =>
-        String(item?._id) === pendingDealId ||
-        String(item?.deal_id) === pendingDealId,
-    );
+    const hasDeal = lists.some(item => {
+      const itemId =
+        item?._id || item?.deal_id || item?.id || item?.dealId || item?.dealID;
+
+      return itemId && String(itemId) === pendingDealId;
+    });
 
     if (hasDeal) {
       setAutoOpenDealId(pendingDealId);
@@ -76,30 +76,28 @@ const Deals = () => {
     getAllDeals,
   ]);
 
-  const keyExtractor = useCallback(
-    (item: any, index: number) => index.toString(),
-    [],
-  );
+  const keyExtractor = useCallback((item: any, index: number) => {
+    const itemId = item?._id || item?.deal_id || item?.id || index;
+    return `${itemId}_${index}`;
+  }, []);
 
   const getAllDeals = useCallback(
-    async (
-      _page: number,
-      isFeature = isFeatured,
-      searchQuery = search,
-    ) => {
+    async (_page: number) => {
       if (_page === 1) {
         setPage(1);
         setHasMoreData(true);
       }
 
+      if (isLoading && _page > 1) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         const result = await dispatch(
-          getAllDealListing({
-            length: 6,
+          getMergedJsonDeals({
             page: _page,
-            search: searchQuery,
-            isFeature: isFeature === 1,
+            pageSize: 50,
           }),
         );
 
@@ -111,9 +109,18 @@ const Deals = () => {
             }
           } else if (_page === 1) {
             setList(result.data);
+            if (result.data.length < 50) {
+              setHasMoreData(false);
+            }
           } else {
             setList(prev => [...prev, ...result.data]);
+            if (result.data.length < 50) {
+              setHasMoreData(false);
+            }
           }
+        } else if (_page === 1) {
+          setList([]);
+          setHasMoreData(false);
         }
       } catch (error) {
         console.log('Error in handleSignIn:', error);
@@ -121,46 +128,23 @@ const Deals = () => {
         setIsLoading(false);
       }
     },
-    [dispatch, isFeatured, search],
+    [dispatch, isLoading],
   );
 
   const debouncedSearch = useCallback(
-    _.debounce(query => {
-      getAllDeals(1, isFeatured, query);
+    _.debounce((_query?: string) => {
+      getAllDeals(1);
     }, 500),
-    [getAllDeals, isFeatured],
+    [getAllDeals],
   );
 
   const HeaderComponent = useCallback(() => {
     return (
       <View>
         <Text style={style.textStyle}>Deals</Text>
-        {/* <View style={style.tabContainer}>
-          {['Latest Deal', 'Featured Deals'].map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                style.tab,
-                {
-                  backgroundColor:
-                    isFeatured === index
-                      ? Colors.Cornsilk
-                      : Colors.Floral_White,
-                  borderBottomWidth:
-                    isFeatured === index ? moderateScale(2) : moderateScale(0),
-                },
-              ]}
-              onPress={() => {
-                setIsFeatured(index);
-                getAllDeals(1, index, search);
-              }}>
-              <Text style={[style.tabText]}>{item}</Text>
-            </TouchableOpacity>
-          ))}
-        </View> */}
       </View>
     );
-  }, [isFeatured, search, setIsFeatured]);
+  }, []);
 
   return (
     <GeneralTemplate
@@ -186,17 +170,17 @@ const Deals = () => {
         data={lists}
         keyExtractor={keyExtractor}
         renderItem={({item, index}) => {
+          const itemId =
+            item?._id || item?.deal_id || item?.id || item?.dealId || item?.dealID;
           const shouldAutoOpen =
-            autoOpenDealId &&
-            (String(item?._id) === autoOpenDealId ||
-              String(item?.deal_id) === autoOpenDealId);
+            autoOpenDealId && itemId && String(itemId) === autoOpenDealId;
 
           return (
             <ProductCard
               enableModal={true}
               item={item}
               key={index}
-              jsonData={false}
+              jsonData={true}
               autoOpenModal={!!shouldAutoOpen}
               onModalOpen={() => {
                 setAutoOpenDealId(undefined);
