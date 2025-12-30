@@ -23,6 +23,7 @@ import ChangePassword from '../screens/main/profile/ChangePassword';
 import FavouriteDeals from '../screens/main/profile/FavouriteDeals';
 import ContactUs from '../screens/main/profile/ContactUs';
 import EditPost from '@app/screens/main/post/EditPost';
+import DealDetails from '@app/screens/main/deals/DealDetails';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -59,6 +60,7 @@ export default function StackNavigation() {
     FavouriteDeals: FavouriteDeals,
     ContactUs: ContactUs,
     EditPost: EditPost,
+    DealDetails: DealDetails,
   };
 
   // console.log(
