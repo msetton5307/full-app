@@ -27,7 +27,7 @@ interface CustomHeaderProps {
   isProfileVisible?: boolean;
   marginTop?: number;
   title?: string;
-  isNotificationVisible?: boolean;
+  isNotificationVisible? :boolean
 }
 
 const Header = (props: CustomHeaderProps) => {
@@ -41,7 +41,7 @@ const Header = (props: CustomHeaderProps) => {
     setSearchValue = () => {},
     isSearch = true,
     isProfileVisible = true,
-    isNotificationVisible = false,
+    isNotificationVisible = true,
     marginTop = Platform.OS === 'ios' ? 0 : 0, // insets.top
     title = '',
   } = props;

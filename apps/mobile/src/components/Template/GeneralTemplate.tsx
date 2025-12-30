@@ -38,9 +38,6 @@ interface GeneralTemplateInterface {
   title?: string;
   isRefreshing?: boolean;
   onRefresh?: () => void;
-  isNotificationVisible?: boolean;
-  useBackgroundImage?: boolean;
-  backgroundColor?: string;
 }
 
 const GeneralTemplate = ({
@@ -58,9 +55,6 @@ const GeneralTemplate = ({
   title = '',
   isRefreshing = false,
   onRefresh = () => {},
-  isNotificationVisible = false,
-  useBackgroundImage = true,
-  backgroundColor = Colors.white,
 }: GeneralTemplateInterface) => {
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
@@ -75,87 +69,70 @@ const GeneralTemplate = ({
     }
   };
 
-  const content = (
-    <View style={styles.container}>
-      <MyStatusBar backgroundColor={Colors.white} barStyle={'dark-content'} />
-      <KeyboardAvoidingView
-        style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Header
-          enableBack={enableBack}
-          headerContainer={headerContainer}
-          isProfileVisible={isProfileVisible}
-          isSearch={isSearch}
-          searchContainer={searchContainer}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-          title={title}
-          isNotificationVisible={isNotificationVisible}
-        />
-        <View
-          style={styles.main}
-          onStartShouldSetResponder={() => {
-            Keyboard.dismiss();
-            return false;
-          }}>
-          <View style={Css.w100}>{fixedComponent}</View>
-          <ScrollView
-            style={{
-              flex: 1,
-            }}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingBottom: moderateScale(Platform.OS === 'ios' ? 120 : 180),
-            }}>
-            {isRefreshing && (
-              <ActivityIndicator
-                size="small"
-                color={Colors.Aztec_Gold}
-                style={{
-                  marginVertical: 10,
-                }}
-              />
-            )}
-            {children}
-            {isLoading && (
-              <ActivityIndicator
-                size="small"
-                color={Colors.Aztec_Gold}
-                style={{
-                  marginVertical: 10,
-                }}
-              />
-            )}
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
-  );
-
-  if (useBackgroundImage) {
-    return (
-      <ImageBackground
-        source={Images.Background}
-        style={{height: height, width: width}}
-        resizeMode="stretch">
-        {content}
-      </ImageBackground>
-    );
-  }
-
   return (
-    <View
-      style={{
-        height: height,
-        width: width,
-        backgroundColor: backgroundColor,
-      }}>
-      {content}
-    </View>
+    <ImageBackground
+      source={Images.Background}
+      style={{height: height, width: width}}
+      resizeMode="stretch">
+      <View style={styles.container}>
+
+        <MyStatusBar backgroundColor={Colors.white} barStyle={'dark-content'} />
+        <KeyboardAvoidingView
+          style={{flex: 1}}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <Header
+            enableBack={enableBack}
+            headerContainer={headerContainer}
+            isProfileVisible={isProfileVisible}
+            isSearch={isSearch}
+            searchContainer={searchContainer}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            title={title}
+          />
+          <View
+            style={styles.main}
+            onStartShouldSetResponder={() => {
+              Keyboard.dismiss();
+              return false;
+            }}>
+            <View style={Css.w100}>{fixedComponent}</View>
+            <ScrollView
+              style={{
+                flex: 1,
+              }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              contentContainerStyle={{
+                flexGrow: 1,
+                paddingBottom: moderateScale(Platform.OS === 'ios' ? 120 : 180),
+              }}>
+              {isRefreshing && (
+                <ActivityIndicator
+                  size="small"
+                  color={Colors.Aztec_Gold}
+                  style={{
+                    marginVertical: 10,
+                  }}
+                />
+              )}
+              {children}
+              {isLoading && (
+                <ActivityIndicator
+                  size="small"
+                  color={Colors.Aztec_Gold}
+                  style={{
+                    marginVertical: 10,
+                  }}
+                />
+              )}
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </ImageBackground>
   );
 };
 
