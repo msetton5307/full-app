@@ -197,13 +197,15 @@ const DealRepo = {
   getStats: async () => {
     try {
       let count = await DealModel.find({ "isDeleted": false }).countDocuments();
-      let activecount = await DealModel.find({ "isDeleted": false, "status": "Active" }).countDocuments();
-      let inactivecount = await DealModel.find({ "isDeleted": false, "status": "Inactive" }).countDocuments();
+      let approvedCount = await DealModel.find({ "isDeleted": false, "status": "Approved" }).countDocuments();
+      let pendingCount = await DealModel.find({ "isDeleted": false, "status": "Pending" }).countDocuments();
+      let expiredCount = await DealModel.find({ "isDeleted": false, "status": "Expired" }).countDocuments();
 
       return {
         count,
-        activecount,
-        inactivecount
+        approvedCount,
+        pendingCount,
+        expiredCount
       };
     } catch (e) {
       return e;
@@ -223,6 +225,88 @@ const DealRepo = {
       };
     } catch (e) {
       return e;
+    }
+  },
+
+  getAllWithMetrics: async () => {
+    try {
+      const deals = await DealModel.aggregate([
+        { $match: { isDeleted: false } },
+        {
+          $lookup: {
+            from: 'dealimages',
+            let: { id: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$deal_id', '$$id'] },
+                      { $eq: ['$isDeleted', false] }
+                    ]
+                  }
+                }
+              },
+              { $sort: { createdAt: 1 } },
+              { $limit: 1 },
+              { $project: { image: 1 } }
+            ],
+            as: 'images'
+          }
+        },
+        {
+          $lookup: {
+            from: 'likedislikedeals',
+            let: { id: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$dealId', '$$id'] },
+                      { $eq: ['$isDeleted', false] }
+                    ]
+                  }
+                }
+              },
+              {
+                $group: {
+                  _id: '$dealId',
+                  likes: {
+                    $sum: { $cond: [{ $eq: ['$isLike', true] }, 1, 0] }
+                  },
+                  dislikes: {
+                    $sum: { $cond: [{ $eq: ['$isDislike', true] }, 1, 0] }
+                  }
+                }
+              }
+            ],
+            as: 'likeStats'
+          }
+        },
+        {
+          $addFields: {
+            primaryImage: { $ifNull: [{ $arrayElemAt: ['$images.image', 0] }, null] },
+            likes: { $ifNull: [{ $arrayElemAt: ['$likeStats.likes', 0] }, 0] },
+            dislikes: { $ifNull: [{ $arrayElemAt: ['$likeStats.dislikes', 0] }, 0] },
+            clickCount: { $ifNull: ['$clickCount', 0] },
+            ctaClickCount: { $ifNull: ['$ctaClickCount', 0] },
+            expiredReports: { $ifNull: ['$expiredReports', 0] },
+            isExpiredReported: { $ifNull: ['$isExpiredReported', false] }
+          }
+        },
+        {
+          $project: {
+            images: 0,
+            likeStats: 0
+          }
+        },
+        { $sort: { createdAt: -1 } }
+      ]);
+
+      return deals;
+    } catch (e) {
+      throw (e);
     }
   },
 

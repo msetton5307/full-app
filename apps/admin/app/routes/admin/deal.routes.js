@@ -65,6 +65,7 @@ namedRouter.get("deal.category", '/deal/category/:id', request_param.any(), Deal
 namedRouter.post("deal.update", '/deal/update', request_param.any(), DealController.update);
 namedRouter.get("deal.delete", '/deal/delete/:id', DealController.delete);
 namedRouter.get("deal.statusChange", '/deal/status-change/:id/:status', request_param.any(), DealController.statusChange);
+namedRouter.post("deal.markExpired", '/deal/mark-expired/:id', DealController.markExpired);
 namedRouter.get('api.bank.payment', '/deal/payment/:id', DealController.addPaymentIntent);
 
 

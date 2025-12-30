@@ -3,7 +3,7 @@ const mongooseAggregatePaginate = require('mongoose-aggregate-paginate');
 const Schema = mongoose.Schema;
 
 const bools = [true, false];
-const status = ['Approved', 'Pending', 'Rejected'];
+const status = ['Approved', 'Pending', 'Rejected', 'Expired'];
 
 const DealFormSchema = new Schema({
   deal_title: { type: String, required: true, default: '' },
@@ -13,6 +13,11 @@ const DealFormSchema = new Schema({
   discount: { type: String, required: true, default: '' },
   isFeature: { type: Boolean, required: false, default: false },
   brand_logo: { type: String, default: '' },
+  clickCount: { type: Number, default: 0 },
+  ctaClickCount: { type: Number, default: 0 },
+  expiredReports: { type: Number, default: 0 },
+  isExpiredReported: { type: Boolean, default: false },
+  isExpired: { type: Boolean, default: false },
   userId: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
   isPaymentDone: { type: Boolean, required: false, default: false },
   status: { type: String, default: 'Pending', enum: status },
