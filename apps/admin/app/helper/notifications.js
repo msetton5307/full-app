@@ -147,22 +147,25 @@ const validateCredentialsPresence = () => {
     const hasApplicationDefault = Boolean(applicationDefaultCredentialsPath);
     const hasPartialServiceAccountEnv = Boolean(envPrivateKey || envPrivateKeyBase64 || envClientEmail || envProjectId);
     const hasPartialOauthEnv = Boolean(process.env.FIREBASE_OAUTH_REFRESH_TOKEN || process.env.FIREBASE_OAUTH_CLIENT_SECRET || process.env.FIREBASE_OAUTH_CLIENT_ID || oauthPlistPath);
+    const hasResolvedCredential = Boolean(serviceAccount || oauthCredential || hasApplicationDefault);
 
     const invalidPathMessages = [];
 
-    if (configuredServiceAccountPath && !fs.existsSync(configuredServiceAccountPath)) {
-        invalidPathMessages.push(`FIREBASE_CREDENTIALS_PATH is set to "${configuredServiceAccountPath}" but the file could not be found.`);
-    }
+    if (!hasResolvedCredential) {
+        if (configuredServiceAccountPath && !fs.existsSync(configuredServiceAccountPath)) {
+            invalidPathMessages.push(`FIREBASE_CREDENTIALS_PATH is set to "${configuredServiceAccountPath}" but the file could not be found.`);
+        }
 
-    if (applicationDefaultCredentialsPath && !fs.existsSync(applicationDefaultCredentialsPath)) {
-        invalidPathMessages.push(`GOOGLE_APPLICATION_CREDENTIALS is set to "${applicationDefaultCredentialsPath}" but the file could not be found.`);
+        if (applicationDefaultCredentialsPath && !fs.existsSync(applicationDefaultCredentialsPath)) {
+            invalidPathMessages.push(`GOOGLE_APPLICATION_CREDENTIALS is set to "${applicationDefaultCredentialsPath}" but the file could not be found.`);
+        }
     }
 
     if (invalidPathMessages.length) {
         throw new Error(`[NotificationHelper] ${invalidPathMessages.join(' ')} ${credentialGuidance}`);
     }
 
-    if (serviceAccount || oauthCredential || hasApplicationDefault) {
+    if (hasResolvedCredential) {
         if (serviceAccount) {
             return;
         }
