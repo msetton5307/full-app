@@ -135,7 +135,7 @@ class NotificationController {
         _id && mongoose.Types.ObjectId.isValid(deal._id)
         ? await DealRepo.getAllByFieldImages({ deal_id: deal._id })
         : [];
-      const notificationImage = dealImages?.[0]?.image || deal?.notification_image || '';
+      const notificationImage = this.buildImageUrl(dealImages?.[0]?.image || deal?.notification_image || '');
 
       console.log('[NotificationController.broadcast] Prepared deal data for notification:', {
         dealId: deal?._id?.toString?.() || null,
