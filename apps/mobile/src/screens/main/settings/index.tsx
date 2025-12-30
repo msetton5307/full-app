@@ -35,9 +35,9 @@ const Setting = () => {
   const [infoSettings, setInfoSettings] = useState<
     Record<InfoSettingsKeys, boolean>
   >({
-    notification: _settings.notification,
-    preferences: _settings.preferences,
-    email_notification: _settings.email_notification,
+    notification: _settings.notification ?? true,
+    preferences: _settings.preferences ?? false,
+    email_notification: _settings.email_notification ?? true,
   });
   const [adminDeals, setAdminDeals] = useState<any[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
@@ -291,7 +291,7 @@ const ToggleOption = ({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={() => onToggle(!status)}
-      style={[styles.onOffContainer, status ? Css.fdr : Css.fdrr]}>
+      style={[styles.onOffContainer, status ? Css.fdrr : Css.fdr]}>
       <View
         style={[
           styles.onOffDot,

@@ -13,8 +13,8 @@ interface UserState {
 const initialState: UserState = {
   userInfo: null,
   settings: {
-    email_notification: false,
-    notification: false,
+    email_notification: true,
+    notification: true,
     preferences: false,
   },
   // Initialize other state properties
