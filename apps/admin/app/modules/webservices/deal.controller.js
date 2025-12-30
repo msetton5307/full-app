@@ -53,6 +53,69 @@ class DealControllerApi {
 
     }
 
+    async recordDealView(req, res) {
+        try {
+            const { dealId } = req.body;
+
+            if (!dealId) {
+                return requestHandler.throwError(400, 'Deal id is required')();
+            }
+
+            const updatedDeal = await dealRepo.incrementClickCount(dealId);
+
+            if (_.isEmpty(updatedDeal)) {
+                return requestHandler.throwError(404, 'Deal does not exist')();
+            }
+
+            return requestHandler.sendSuccess(res, 'Deal view recorded')(updatedDeal);
+        }
+        catch (err) {
+            return requestHandler.sendError(req, res, err);
+        }
+    }
+
+    async recordDealCtaClick(req, res) {
+        try {
+            const { dealId } = req.body;
+
+            if (!dealId) {
+                return requestHandler.throwError(400, 'Deal id is required')();
+            }
+
+            const updatedDeal = await dealRepo.incrementCtaClickCount(dealId);
+
+            if (_.isEmpty(updatedDeal)) {
+                return requestHandler.throwError(404, 'Deal does not exist')();
+            }
+
+            return requestHandler.sendSuccess(res, 'Deal CTA click recorded')(updatedDeal);
+        }
+        catch (err) {
+            return requestHandler.sendError(req, res, err);
+        }
+    }
+
+    async reportExpiredDeal(req, res) {
+        try {
+            const { dealId } = req.body;
+
+            if (!dealId) {
+                return requestHandler.throwError(400, 'Deal id is required')();
+            }
+
+            const updatedDeal = await dealRepo.incrementExpiredReports(dealId);
+
+            if (_.isEmpty(updatedDeal)) {
+                return requestHandler.throwError(404, 'Deal does not exist')();
+            }
+
+            return requestHandler.sendSuccess(res, 'Deal reported as expired')(updatedDeal);
+        }
+        catch (err) {
+            return requestHandler.sendError(req, res, err);
+        }
+    }
+
 
     async likeDeal(req, res) {
         try {

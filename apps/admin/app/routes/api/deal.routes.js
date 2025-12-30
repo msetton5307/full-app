@@ -68,6 +68,108 @@ namedRouter.all('/deal*', auth.authenticateAPI);
 
 /**
 * @swagger
+* /deal/view:
+*   post:
+*     summary: Record a deal view
+*     tags:
+*       - Deal
+*     security:
+*       - Token: []
+*     produces:
+*       - application/json
+*     parameters:
+*         - name: body
+*           in: body
+*           description: Deal view tracking
+*           required: true
+*           schema:
+*             type: object
+*             required:
+*                  - dealId
+*             properties:
+*                 dealId:
+*                     type: string
+*     responses:
+*        200:
+*          description: Deal view recorded
+*        400:
+*          description: Bad Request
+*        500:
+*          description: Server Error
+*/
+
+namedRouter.post("deal.view", "/deal/view", dealcontrollerapi.recordDealView);
+
+/**
+* @swagger
+* /deal/cta-click:
+*   post:
+*     summary: Record a deal CTA click
+*     tags:
+*       - Deal
+*     security:
+*       - Token: []
+*     produces:
+*       - application/json
+*     parameters:
+*         - name: body
+*           in: body
+*           description: Deal CTA click tracking
+*           required: true
+*           schema:
+*             type: object
+*             required:
+*                  - dealId
+*             properties:
+*                 dealId:
+*                     type: string
+*     responses:
+*        200:
+*          description: Deal CTA click recorded
+*        400:
+*          description: Bad Request
+*        500:
+*          description: Server Error
+*/
+
+namedRouter.post("deal.cta.click", "/deal/cta-click", dealcontrollerapi.recordDealCtaClick);
+
+/**
+* @swagger
+* /deal/report-expired:
+*   post:
+*     summary: Report a deal as expired
+*     tags:
+*       - Deal
+*     security:
+*       - Token: []
+*     produces:
+*       - application/json
+*     parameters:
+*         - name: body
+*           in: body
+*           description: Report expired deal
+*           required: true
+*           schema:
+*             type: object
+*             required:
+*                  - dealId
+*             properties:
+*                 dealId:
+*                     type: string
+*     responses:
+*        200:
+*          description: Deal expired report recorded
+*        400:
+*          description: Bad Request
+*        500:
+*          description: Server Error
+*/
+
+namedRouter.post("deal.report.expired", "/deal/report-expired", dealcontrollerapi.reportExpiredDeal);
+
+/**
+* @swagger
 * /deal/listing:
 *   post:
 *     summary: Deal Listing

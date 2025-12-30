@@ -381,6 +381,84 @@ const applyDealFavorite = (payload: { dealId: string }) => {
   };
 };
 
+const trackDealView = (payload: { dealId: string }) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const result: AxiosResponse<any> = await instance.post(
+        listing.dealView,
+        payload,
+        dealsBaseConfig,
+      );
+
+      const { status, data } = result;
+
+      return {
+        success: status === 200,
+        message: data?.message,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error?.response
+          ? `${error.response?.data?.error?.errorType}`
+          : `${error?.message}`,
+      };
+    }
+  };
+};
+
+const trackDealCtaClick = (payload: { dealId: string }) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const result: AxiosResponse<any> = await instance.post(
+        listing.dealCtaClick,
+        payload,
+        dealsBaseConfig,
+      );
+
+      const { status, data } = result;
+
+      return {
+        success: status === 200,
+        message: data?.message,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error?.response
+          ? `${error.response?.data?.error?.errorType}`
+          : `${error?.message}`,
+      };
+    }
+  };
+};
+
+const reportDealExpired = (payload: { dealId: string }) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const result: AxiosResponse<any> = await instance.post(
+        listing.reportExpired,
+        payload,
+        dealsBaseConfig,
+      );
+
+      const { status, data } = result;
+
+      return {
+        success: status === 200,
+        message: data?.message,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error?.response
+          ? `${error.response?.data?.error?.errorType}`
+          : `${error?.message}`,
+      };
+    }
+  };
+};
+
 const addNewDeal = (payload: FormData) => {
   console.log('payloadasdlAHSdklhjASLKdhjhj -- ', payload);
   return async (dispatch: Dispatch) => {
@@ -567,6 +645,9 @@ export {
   getDealFavoriteList,
   applyDealLiked,
   applyDealFavorite,
+  trackDealView,
+  trackDealCtaClick,
+  reportDealExpired,
   addNewDeal,
   getPostedDeal,
   updateDeal,
