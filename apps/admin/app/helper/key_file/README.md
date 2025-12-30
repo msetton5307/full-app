@@ -1,3 +1,4 @@
 # Firebase service account location
 
-Place the Firebase Admin SDK JSON credentials file in this directory. The notification helper will look for a file named `sysavings-5ad56-aeb337580e7d.json` by default (or the path provided in `FIREBASE_CREDENTIALS_PATH`).
+Place the Firebase Admin SDK JSON credentials file in this directory with the exact name `sysavings-5ad56-aeb337580e7d.json`.
+The notification helper now always reads that file directly (no environment variables), so ensure it contains the service account details you want to use for push notifications.
