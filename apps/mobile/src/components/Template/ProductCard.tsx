@@ -34,6 +34,9 @@ export interface ProductCardInterface {
   isShowFavorite?: boolean;
   isStatus?: string;
   jsonData?: boolean;
+  autoOpenModal?: boolean;
+  onModalOpen?: () => void;
+  onModalClose?: () => void;
 }
 
 const formatPrice = (amount: number): string => {
@@ -84,6 +87,9 @@ const ProductCard = ({
   isShowFavorite = false,
   isStatus = '',
   jsonData = false,
+  autoOpenModal = false,
+  onModalOpen,
+  onModalClose,
 }: ProductCardInterface) => {
   const [details, setDetails] = useState<ProductDetails>({
     brand_logo: '',
@@ -176,6 +182,7 @@ const ProductCard = ({
         });
 
         setIsVisible(true);
+        onModalOpen?.();
       } else {
         try {
           const result = await dispatch(
@@ -186,6 +193,7 @@ const ProductCard = ({
           console.log('getProductDetails result_details', result);
           if (result.success) {
             setIsVisible(true);
+            onModalOpen?.();
             setProductDetails({
               _id: result.data?._id,
               brand_logo: item?.brand_logo
@@ -213,8 +221,14 @@ const ProductCard = ({
         }
       }
     },
-    [jsonData, item],
+    [dispatch, jsonData, item, onModalOpen],
   );
+
+  useEffect(() => {
+    if (enableModal && autoOpenModal && !isVisible) {
+      getProductDetails(item);
+    }
+  }, [autoOpenModal, enableModal, getProductDetails, isVisible, item]);
 
   const handleLikeDislike = useCallback(
     async (id: string, action: 'like' | 'dislike', currentState: boolean) => {
@@ -412,7 +426,10 @@ const ProductCard = ({
             <View style={styles.modalVisibleContainer}>
               <TouchableOpacity
                 style={styles.crossiconContainer}
-                onPress={() => setIsVisible(false)}>
+                onPress={() => {
+                  setIsVisible(false);
+                  onModalClose?.();
+                }}>
                 <Image style={Css.icon20} source={Icons.cross} />
               </TouchableOpacity>
               <ScrollView
