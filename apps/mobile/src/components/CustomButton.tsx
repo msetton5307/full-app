@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageSourcePropType,
   StyleProp,
@@ -61,34 +62,39 @@ export const CustomButtonOutline = ({
   containerStyle = {},
   labelStyle = {},
   disabled = false,
+  loading = false,
 }: {
   label: string;
   onPress: Function;
   containerStyle?: StyleProp<ViewStyle> | undefined;
   labelStyle?: StyleProp<TextStyle> | undefined;
-
   disabled?: boolean;
+  loading?: boolean;
 }) => {
   return (
     <TouchableOpacity
       style={[
         styles.outlineButtonContainer,
-        disabled
+        disabled || loading
           ? styles.outlineButtonContainerDisabled
           : styles.outlineButtonContainer,
         containerStyle,
       ]}
       activeOpacity={0.5}
       onPress={() => onPress()}
-      disabled={disabled}>
-      <Text
-        style={[
-          styles.solidbuttonLabel,
-          disabled ? {color: Colors.gray_1} : {},
-          labelStyle,
-        ]}>
-        {label}
-      </Text>
+      disabled={disabled || loading}>
+      {loading ? (
+        <ActivityIndicator color={Colors.Aztec_Gold} />
+      ) : (
+        <Text
+          style={[
+            styles.solidbuttonLabel,
+            disabled ? {color: Colors.gray_1} : {},
+            labelStyle,
+          ]}>
+          {label}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
