@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Image,
   Modal,
@@ -24,6 +24,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Css from '@app/themes/Css';
 import {CustomButtonOutline, CustomButtonSolid} from '../CustomButton';
 import {showMessage} from '@app/utils/helper/Toast';
+import * as Sentry from '@sentry/react-native';
 
 export interface ProductCardInterface {
   item: any;
@@ -160,6 +161,38 @@ const ProductCard = ({
     isJson: false,
   });
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isReportingExpired, setIsReportingExpired] = useState<boolean>(false);
+
+  const currentDealId = useMemo(
+    () =>
+      productDetails?._id ||
+      item?._id ||
+      item?.deal_id ||
+      item?.id ||
+      item?.dealId ||
+      item?.dealID,
+    [item, productDetails?._id],
+  );
+
+  const trackDealEvent = useCallback(
+    (message: string, extra: Record<string, any> = {}) => {
+      const eventPayload = {
+        dealId: currentDealId,
+        title: productDetails?.title || item?.deal_title || item?.Name,
+        ...extra,
+      };
+
+      Sentry.addBreadcrumb({
+        category: 'deal-interaction',
+        message,
+        data: eventPayload,
+        level: 'info',
+      });
+
+      console.log(`Deal tracking: ${message}`, eventPayload);
+    },
+    [currentDealId, item?.Name, item?.deal_title, productDetails?.title],
+  );
 
   const getProductDetails = useCallback(
     async (item: any) => {
@@ -183,6 +216,9 @@ const ProductCard = ({
 
         setIsVisible(true);
         onModalOpen?.();
+        trackDealEvent('deal_card_opened', {
+          source: jsonData ? 'json_listing' : 'deal_listing',
+        });
       } else {
         try {
           const result = await dispatch(
@@ -194,6 +230,9 @@ const ProductCard = ({
           if (result.success) {
             setIsVisible(true);
             onModalOpen?.();
+            trackDealEvent('deal_card_opened', {
+              source: jsonData ? 'json_listing' : 'deal_listing',
+            });
             setProductDetails({
               _id: result.data?._id,
               brand_logo: item?.brand_logo
@@ -221,7 +260,7 @@ const ProductCard = ({
         }
       }
     },
-    [dispatch, jsonData, item, onModalOpen],
+    [dispatch, jsonData, item, onModalOpen, trackDealEvent],
   );
 
   useEffect(() => {
@@ -241,6 +280,9 @@ const ProductCard = ({
           }),
         );
         if (result.success) {
+          trackDealEvent(`deal_${action}`, {
+            value: !currentState,
+          });
           setProductDetails(prev => ({
             ...prev,
             [action === 'like' ? 'isLike' : 'isDislike']: !currentState,
@@ -251,7 +293,7 @@ const ProductCard = ({
         console.log(`Error handling ${action}`, error);
       }
     },
-    [dispatch],
+    [dispatch, trackDealEvent],
   );
 
   const copyToClipboard = (link: string) => {
@@ -263,6 +305,9 @@ const ProductCard = ({
 
   const openLink = (link: string) => {
     if (link !== '' && link !== undefined) {
+      trackDealEvent('deal_link_clicked', {
+        link,
+      });
       Linking.openURL(link).catch(err =>
         console.error('Error opening link:', err),
       );
@@ -274,6 +319,9 @@ const ProductCard = ({
       try {
         const result = await dispatch(applyDealFavorite({dealId: id}));
         if (result.success) {
+          trackDealEvent('deal_favourite', {
+            value: !isFavourite,
+          });
           setProductDetails(prev => ({
             ...prev,
             isFavourite: !isFavourite,
@@ -283,8 +331,26 @@ const ProductCard = ({
         console.log('Error handling favourite', error);
       }
     },
-    [dispatch],
+    [dispatch, trackDealEvent],
   );
+
+  const handleReportExpired = useCallback(async () => {
+    if (!currentDealId) {
+      showMessage('Unable to report this deal right now.');
+      return;
+    }
+
+    try {
+      setIsReportingExpired(true);
+      trackDealEvent('deal_report_expired');
+      showMessage('Thanks for letting us know this deal is expired.');
+    } catch (error) {
+      console.log('Error reporting expired deal', error);
+      showMessage('Unable to report this deal. Please try again.');
+    } finally {
+      setIsReportingExpired(false);
+    }
+  }, [currentDealId, trackDealEvent]);
 
   const share = async (data: ViewProductDetails) => {
     try {
@@ -585,14 +651,13 @@ const ProductCard = ({
                     )}
                   </View>
                   <View style={Css.mb20} />
-                  {/* {!productDetails?.isJson && (
-                        <CustomButtonOutline
-                          label="Expired"
-                          onPress={() => {}}
-                          disabled
-                          containerStyle={Css.w100}
-                        />
-                      )} */}
+                  <CustomButtonOutline
+                    label="Report expired"
+                    onPress={handleReportExpired}
+                    loading={isReportingExpired}
+                    disabled={isReportingExpired}
+                    containerStyle={Css.w100}
+                  />
                 </View>
               </ScrollView>
               <CustomButtonSolid
