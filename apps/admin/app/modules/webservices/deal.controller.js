@@ -9,6 +9,7 @@ const notificationRepo = require("../notification/repositories/notification.repo
 const mongoose = require("mongoose")
 const fs = require('fs');
 const settingsRepository = require("../settings/repositories/settings.repository");
+const priceTrackerController = require('./priceTracker.controller');
 
 // response helper
 const Logger = require(appRoot + '/helper/logger');
@@ -239,6 +240,7 @@ class DealControllerApi {
                     // console.log(check, "yyyyyyy");
 
                 }
+                await priceTrackerController.processDealTriggers(saveData);
                 return requestHandler.sendSuccess(res, 'Deal Saved Successfully')([{ saveData }, { saveImage }]);
             }
         }

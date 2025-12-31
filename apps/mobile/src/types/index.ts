@@ -31,6 +31,7 @@ export type RootTabParamList = {
   Categories: undefined;
   Deals: {dealId?: string} | undefined;
   Notification: undefined;
+  PriceTrackers: undefined;
   Setting: undefined;
 };
 
@@ -57,6 +58,18 @@ export type ImagePickerProps = {
     height?: number;
   };
   cropperCircleOverlay?: boolean;
+};
+
+export type PRICE_TRACKER_PAYLOAD = {
+  keyword: string;
+  category?: string;
+};
+
+export type PRICE_TRACKER = {
+  _id: string;
+  keyword: string;
+  category?: string;
+  createdAt?: string;
 };
 
 // ----------------------- API PAYLOAD ----------------------------
