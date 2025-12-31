@@ -20,6 +20,9 @@ const SYSAVINGS_API_BASE_URL = 'https://api.sysavings.com';
 // response helper
 
 class DealControllerApi {
+    getUserId(req) {
+        return req.body?.userId || req.query?.userId || req.user?._id || null;
+    }
     async getDealList(req, res) {
         try {
             console.log(req.user);
@@ -56,18 +59,18 @@ class DealControllerApi {
     async recordDealView(req, res) {
         try {
             const { dealId } = req.body;
+            const userId = this.getUserId(req);
 
-            if (!dealId) {
-                return requestHandler.throwError(400, 'Deal id is required')();
+            if (!dealId || !userId) {
+                return requestHandler.throwError(400, 'Deal id and user id are required')();
             }
 
-            const updatedDeal = await dealRepo.incrementClickCount(dealId);
+            const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/view`, {
+                dealId,
+                userId,
+            });
 
-            if (_.isEmpty(updatedDeal)) {
-                return requestHandler.throwError(404, 'Deal does not exist')();
-            }
-
-            return requestHandler.sendSuccess(res, 'Deal view recorded')(updatedDeal);
+            return requestHandler.sendSuccess(res, 'Deal view recorded')(responseData);
         }
         catch (err) {
             return requestHandler.sendError(req, res, err);
@@ -76,19 +79,20 @@ class DealControllerApi {
 
     async recordDealCtaClick(req, res) {
         try {
-            const { dealId } = req.body;
+            const { dealId, url } = req.body;
+            const userId = this.getUserId(req);
 
-            if (!dealId) {
-                return requestHandler.throwError(400, 'Deal id is required')();
+            if (!dealId || !userId) {
+                return requestHandler.throwError(400, 'Deal id and user id are required')();
             }
 
-            const updatedDeal = await dealRepo.incrementCtaClickCount(dealId);
+            const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/cta-click`, {
+                dealId,
+                userId,
+                url: url || '',
+            });
 
-            if (_.isEmpty(updatedDeal)) {
-                return requestHandler.throwError(404, 'Deal does not exist')();
-            }
-
-            return requestHandler.sendSuccess(res, 'Deal CTA click recorded')(updatedDeal);
+            return requestHandler.sendSuccess(res, 'Deal CTA click recorded')(responseData);
         }
         catch (err) {
             return requestHandler.sendError(req, res, err);
@@ -97,19 +101,20 @@ class DealControllerApi {
 
     async reportExpiredDeal(req, res) {
         try {
-            const { dealId } = req.body;
+            const { dealId, reason } = req.body;
+            const userId = this.getUserId(req);
 
-            if (!dealId) {
-                return requestHandler.throwError(400, 'Deal id is required')();
+            if (!dealId || !userId) {
+                return requestHandler.throwError(400, 'Deal id and user id are required')();
             }
 
-            const updatedDeal = await dealRepo.incrementExpiredReports(dealId);
+            const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/report-expired`, {
+                dealId,
+                userId,
+                reason: reason || '',
+            });
 
-            if (_.isEmpty(updatedDeal)) {
-                return requestHandler.throwError(404, 'Deal does not exist')();
-            }
-
-            return requestHandler.sendSuccess(res, 'Deal reported as expired')(updatedDeal);
+            return requestHandler.sendSuccess(res, 'Deal reported as expired')(responseData);
         }
         catch (err) {
             return requestHandler.sendError(req, res, err);
@@ -119,14 +124,19 @@ class DealControllerApi {
 
     async likeDeal(req, res) {
         try {
-            let upsertLike = await dealRepo.saveOrUpdateLike(
-                { dealId: req.body.dealId, userId: req.user._id },
-                { isLike: req.body.isLike, isDislike: req.body.isDisLike, dealId: req.body.dealId, userId: req.user._id }
-            );
+            const { dealId } = req.body;
+            const userId = this.getUserId(req);
 
-            return _.isEmpty(upsertLike)
-                ? requestHandler.throwError(400, 'Error in saving or updating Like')()
-                : requestHandler.sendSuccess(res, 'Like Updated Successfully')(upsertLike);
+            if (!dealId || !userId) {
+                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            }
+
+            const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/like`, {
+                dealId,
+                userId,
+            });
+
+            return requestHandler.sendSuccess(res, 'Like updated successfully')(responseData);
         } catch (err) {
             return requestHandler.sendError(req, res, err);
         }
@@ -136,22 +146,18 @@ class DealControllerApi {
     async favoriteDeal(req, res) {
         try {
             const { dealId } = req.body;
-            const userId = req.user._id;
+            const userId = this.getUserId(req);
 
-            let existData = await dealRepo.getByFieldFavorite({ dealId, userId });
-
-            let newFavoriteStatus = _.isNull(existData)
-                ? { dealId, userId }
-                : { isFavorite: existData.isFavorite ? false : true };
-
-            let upsertLike = await dealRepo.saveOrUpdateFavorite({ dealId, userId }, newFavoriteStatus);
-            console.log("upsertLike: ", upsertLike);
-
-            if (_.isEmpty(upsertLike)) {
-                return requestHandler.throwError(400, 'Error in saving or updating Favorite')();
+            if (!dealId || !userId) {
+                return requestHandler.throwError(400, 'Deal id and user id are required')();
             }
 
-            return requestHandler.sendSuccess(res, 'Favorite Updated Successfully')(upsertLike);
+            const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/favorite`, {
+                dealId,
+                userId,
+            });
+
+            return requestHandler.sendSuccess(res, 'Favorite updated successfully')(responseData);
         } catch (err) {
             return requestHandler.sendError(req, res, err);
         }
@@ -246,14 +252,21 @@ class DealControllerApi {
 
             // console.log(req.user);
 
-            let allList = await dealRepo.getFavoritesByUser(req, res, { userId: req.user._id, isFavorite: true });
-            // console.log(allList, "Aaaaaaa");
-
-
-            if (_.isEmpty(allList)) {
-                return requestHandler.throwError(400, `Favourite List for user ${req.user.fullName} does not exist`)()
+            const userId = this.getUserId(req);
+            if (!userId) {
+                return requestHandler.throwError(400, 'User id is required')();
             }
-            return requestHandler.sendSuccess(res, `Favourite List For user ${req.user.fullName} Fetch Successfully`)(allList);
+
+            const { data: responseData } = await axios.get(`${SYSAVINGS_API_BASE_URL}/api/deal/favorite/list`, {
+                params: { userId },
+            });
+
+            const favouriteDeals = responseData?.data || responseData?.results || responseData;
+
+            if (_.isEmpty(favouriteDeals)) {
+                return requestHandler.throwError(400, `Favourite list for user ${userId} does not exist`)()
+            }
+            return requestHandler.sendSuccess(res, `Favourite list for user ${userId} fetched successfully`)(favouriteDeals);
         }
         catch (err) {
             return requestHandler.sendError(req, res, err);
