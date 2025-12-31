@@ -2,6 +2,7 @@ import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 import { instance } from '../server/instance';
 import { API, API_BASE_URL, DEALS_BASE_URL } from '../constants';
+import { getPersistentUserId } from '../helper/userIdentity';
 import { createFrom } from '../helper/Validation';
 import { setUserInfo } from '../../redux/slice/user.slice';
 import {
@@ -25,7 +26,13 @@ const _header = {
 };
 
 const dealsBaseConfig = { baseURL: DEALS_BASE_URL };
-const dealActionsBaseConfig = { baseURL: API_BASE_URL };
+const dealManagementBaseConfig = { baseURL: API_BASE_URL };
+const dealInteractionsBaseConfig = dealsBaseConfig;
+
+const withUserIdentity = <T extends { userId?: string }>(payload: T) => ({
+  ...payload,
+  userId: payload.userId || getPersistentUserId(),
+});
 
 const getUserDetails = () => {
   return async (dispatch: Dispatch) => {
@@ -301,16 +308,29 @@ const getDealDetails = (payload: { id: string }) => {
   };
 };
 
-const getDealFavoriteList = (payload: DEAL_LISTING_TYPE) => {
+const getDealFavoriteList = (payload: DEAL_LISTING_TYPE = {}) => {
   return async (dispatch: Dispatch) => {
     try {
-      const result: AxiosResponse<any> = await instance.post(
+      const result: AxiosResponse<any> = await instance.get(
         listing.dealFavoriteList,
-        payload,
-        dealActionsBaseConfig,
+        {
+          ...dealInteractionsBaseConfig,
+          params: withUserIdentity(payload),
+        },
       );
       const { status, data } = result;
-      const allDeals = data.data.docs.flatMap((item: any) => item.deals || []);
+      const favoritePayload = data?.data ?? data;
+
+      let allDeals: any[] = [];
+
+      if (Array.isArray(favoritePayload)) {
+        allDeals = favoritePayload;
+      } else if (Array.isArray(favoritePayload?.docs)) {
+        allDeals = favoritePayload.docs.flatMap((item: any) => item.deals || []);
+      } else if (Array.isArray(favoritePayload?.data)) {
+        allDeals = favoritePayload.data;
+      }
+
       return {
         success: status === 200,
         message: data?.message,
@@ -332,8 +352,8 @@ const applyDealLiked = (payload: DEAL_LIKE_TYPE) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealLike,
-        payload,
-        dealActionsBaseConfig,
+        withUserIdentity(payload),
+        dealInteractionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -359,8 +379,8 @@ const applyDealFavorite = (payload: { dealId: string }) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealFavorite,
-        payload,
-        dealActionsBaseConfig,
+        withUserIdentity(payload),
+        dealInteractionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -387,8 +407,8 @@ const trackDealView = (payload: { dealId: string }) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealView,
-        payload,
-        dealActionsBaseConfig,
+        withUserIdentity(payload),
+        dealInteractionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -408,13 +428,13 @@ const trackDealView = (payload: { dealId: string }) => {
   };
 };
 
-const trackDealCtaClick = (payload: { dealId: string }) => {
+const trackDealCtaClick = (payload: { dealId: string; url?: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealCtaClick,
-        payload,
-        dealActionsBaseConfig,
+        withUserIdentity(payload),
+        dealInteractionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -434,13 +454,16 @@ const trackDealCtaClick = (payload: { dealId: string }) => {
   };
 };
 
-const reportDealExpired = (payload: { dealId: string }) => {
+const reportDealExpired = (payload: { dealId: string; reason?: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.reportExpired,
-        payload,
-        dealActionsBaseConfig,
+        withUserIdentity({
+          ...payload,
+          reason: payload.reason || 'User reported this deal as expired.',
+        }),
+        dealInteractionsBaseConfig,
       );
 
       const { status, data } = result;
@@ -467,7 +490,7 @@ const addNewDeal = (payload: FormData) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.addDeal,
         payload,
-        { ..._header, ...dealActionsBaseConfig },
+        { ..._header, ...dealManagementBaseConfig },
       );
 
       const { status, data } = result;
@@ -493,7 +516,7 @@ const getPostedDeal = (payload: DEAL_LISTING_TYPE) => {
       const result: AxiosResponse<any> = await instance.post(
         listing.postedDeals,
         payload,
-        dealActionsBaseConfig,
+        dealManagementBaseConfig,
       );
 
       const { status, data } = result;
@@ -521,7 +544,7 @@ const updateDeal = (payload: FormData) => {
       const result: AxiosResponse<any> = await instance.put(
         listing.updateDeal,
         payload,
-        { ..._header, ...dealActionsBaseConfig },
+        { ..._header, ...dealManagementBaseConfig },
       );
 
       const { status, data } = result;
@@ -547,7 +570,7 @@ const deleteDeal = (id: string) => {
     try {
       const result: AxiosResponse<any> = await instance.delete(
         `${listing.deleteDeal}/${id}`,
-        dealActionsBaseConfig,
+        dealManagementBaseConfig,
       );
       const { status, data } = result;
       return {
@@ -565,7 +588,7 @@ const addBank = (payload: null) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
         listing.addBank,
-        dealActionsBaseConfig,
+        dealManagementBaseConfig,
       );
       const { status, data } = result;
       return {
@@ -584,7 +607,7 @@ const getbankDetails = (payload: null) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
         listing.banklist,
-        dealActionsBaseConfig,
+        dealManagementBaseConfig,
       );
       const { status, data } = result;
       return {
