@@ -38,6 +38,11 @@ export const API = {
   notifications: {
     sendLatestDeal: 'api/notification/latest-deal',
   },
+  priceTracker: {
+    create: 'api/price-tracker',
+    list: 'api/price-tracker',
+    remove: (id: string) => `api/price-tracker/${id}`,
+  },
   category: {
     listing: 'api/category/listing',
     keywords: 'api/category/keyword/listing',
