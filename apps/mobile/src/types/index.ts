@@ -138,6 +138,7 @@ export interface DEAL_LIKE_TYPE {
   isLike: boolean;
   isDisLike: boolean;
   dealId: string;
+  userId?: string;
 }
 
 export interface ADD_DEAL_TYPE {

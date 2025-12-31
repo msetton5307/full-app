@@ -213,13 +213,13 @@ const ProductCard = ({
   );
 
   const recordDealCtaClick = useCallback(
-    async (dealId: string) => {
+    async (dealId: string, url?: string) => {
       if (!dealId) {
         return;
       }
 
       try {
-        await dispatch(trackDealCtaClick({dealId}));
+        await dispatch(trackDealCtaClick({dealId, url}));
       } catch (error) {
         console.log('Error recording deal CTA click', error);
       }
@@ -352,7 +352,7 @@ const ProductCard = ({
       trackDealEvent('deal_link_clicked', {
         link,
       });
-      recordDealCtaClick(currentDealId);
+      recordDealCtaClick(currentDealId, link);
       Linking.openURL(link).catch(err =>
         console.error('Error opening link:', err),
       );
@@ -393,7 +393,10 @@ const ProductCard = ({
     try {
       setIsReportingExpired(true);
       const response = await dispatch(
-        reportDealExpired({dealId: currentDealId}),
+        reportDealExpired({
+          dealId: currentDealId,
+          reason: 'User reported this deal from the app.',
+        }),
       );
       trackDealEvent('deal_report_expired');
       if (response?.success) {

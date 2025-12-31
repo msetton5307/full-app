@@ -13,7 +13,8 @@ type Keys =
   | 'rememberedPassword'
   | 'rememberMe'
   | 'deviceToken'
-  | 'is_admin'; // add more key
+  | 'is_admin'
+  | 'user_id'; // add more key
 
 const Storage = {
   setItem: (key: Keys, value: string) => {
