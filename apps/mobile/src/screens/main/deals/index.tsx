@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Animated,
   FlatList,
   Pressable,
@@ -69,6 +70,8 @@ const Deals = () => {
   const scrollRef = useRef<ScrollView | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('hot');
   const [tabWidth, setTabWidth] = useState<number>(0);
+  const tabSwitchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [isTabSwitching, setIsTabSwitching] = useState<boolean>(false);
   const indicatorPosition = useRef(new Animated.Value(0)).current;
 
   const [lists, setList] = useState<any[]>([]);
@@ -224,6 +227,11 @@ const Deals = () => {
 
   const handleTabPress = useCallback(
     (key: TabKey) => {
+      if (key === activeTab) {
+        return;
+      }
+
+      setIsTabSwitching(true);
       setActiveTab(key);
 
       const tabIndex = tabs.findIndex(tab => tab.key === key);
@@ -231,10 +239,26 @@ const Deals = () => {
         animateIndicatorTo(tabIndex);
       }
 
+      if (tabSwitchTimeout.current) {
+        clearTimeout(tabSwitchTimeout.current);
+      }
+
+      tabSwitchTimeout.current = setTimeout(() => {
+        setIsTabSwitching(false);
+      }, 350);
+
       scrollRef.current?.scrollTo({y: 0, animated: false});
     },
-    [animateIndicatorTo, tabs],
+    [activeTab, animateIndicatorTo, tabs],
   );
+
+  useEffect(() => {
+    return () => {
+      if (tabSwitchTimeout.current) {
+        clearTimeout(tabSwitchTimeout.current);
+      }
+    };
+  }, []);
 
   const HeaderComponent = useCallback(() => {
     return (
@@ -243,7 +267,7 @@ const Deals = () => {
           style={style.tabContainer}
           onLayout={event => {
             const {width} = event.nativeEvent.layout;
-            setTabWidth(width / tabs.length);
+            setTabWidth((width - TAB_CONTAINER_PADDING * 2) / tabs.length);
           }}>
           {tabs.map((tab, index) => {
             const isActive = activeTab === tab.key;
@@ -299,6 +323,7 @@ const Deals = () => {
                   key={index}
                   jsonData={false}
                   autoOpenModal={false}
+                  containerStyle={style.hotDealCard}
                 />
               </View>
             );
@@ -368,6 +393,14 @@ const Deals = () => {
   }, [stores]);
 
   const renderActiveSection = useMemo(() => {
+    if (isTabSwitching) {
+      return (
+        <View style={style.loadingContainer}>
+          <ActivityIndicator size="small" color={Colors.Aztec_Gold} />
+        </View>
+      );
+    }
+
     switch (activeTab) {
       case 'hot':
         return renderHotDeals();
@@ -378,7 +411,7 @@ const Deals = () => {
       default:
         return null;
     }
-  }, [activeTab, renderHotDeals, renderNewDeals, renderStores]);
+  }, [activeTab, isTabSwitching, renderHotDeals, renderNewDeals, renderStores]);
 
   return (
     <GeneralTemplate
@@ -409,6 +442,8 @@ const Deals = () => {
 
 export default Deals;
 
+const TAB_CONTAINER_PADDING = moderateScale(4);
+
 const style = StyleSheet.create({
   flatcontainer: {
     width: '100%',
@@ -423,16 +458,20 @@ const style = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
-    borderRadius: moderateScale(12),
-    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(14),
+    padding: TAB_CONTAINER_PADDING,
     position: 'relative',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.Aztec_Gold,
+    alignItems: 'center',
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: moderateScale(10),
+    paddingVertical: moderateScale(12),
+    borderRadius: moderateScale(10),
   },
   tabText: {
     fontSize: moderateScale(14),
@@ -453,11 +492,11 @@ const style = StyleSheet.create({
   },
   tabIndicator: {
     position: 'absolute',
-    height: '100%',
     backgroundColor: Colors.Aztec_Gold,
-    borderRadius: moderateScale(12),
-    top: 0,
-    left: 0,
+    borderRadius: moderateScale(10),
+    top: TAB_CONTAINER_PADDING,
+    left: TAB_CONTAINER_PADDING,
+    bottom: TAB_CONTAINER_PADDING,
   },
   sectionContainer: {
     marginTop: moderateScale(16),
@@ -470,10 +509,20 @@ const style = StyleSheet.create({
   },
   horizontalList: {
     paddingBottom: moderateScale(10),
+    paddingHorizontal: moderateScale(4),
   },
   horizontalCard: {
-    width: moderateScale(180),
+    width: moderateScale(200),
     marginRight: moderateScale(12),
+  },
+  hotDealCard: {
+    width: '100%',
+    alignSelf: 'stretch',
+  },
+  loadingContainer: {
+    paddingVertical: moderateScale(30),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   storeGrid: {
     flexDirection: 'row',
