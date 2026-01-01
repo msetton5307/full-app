@@ -1,143 +1,115 @@
-<aside class="nav-drawer menu-fixed" data-scroll-to-active="true">
-    <div class="nav-drawer__brand">
-        <div class="brand-mark">
-            <span><%= (project_name || 'Admin').substring(0, 2).toUpperCase() %></span>
-        </div>
-        <div class="brand-copy">
-            <p class="eyebrow-text">Operations suite</p>
-            <h3 class="brand-title"><%= project_name %></h3>
-            <small class="text-muted">A modern cockpit for admins.</small>
-        </div>
-    </div>
-
-    <div class="nav-drawer__summary">
-        <div class="summary-pill">
-            <i class="fa fa-circle text-success me-50"></i>
-            <span>System health</span>
-            <strong>Stable</strong>
-        </div>
-        <div class="summary-pill">
-            <i class="fa fa-bolt text-warning me-50"></i>
-            <span>Priority</span>
-            <strong>Admin tasks</strong>
-        </div>
-    </div>
-
-    <div class="nav-drawer__content">
-        <p class="nav-drawer__label">Overview</p>
-        <ul class="nav-drawer__list" id="main-menu-navigation" data-menu="menu-navigation">
-            <li class="nav-drawer__item <%= (page_name == 'user-dashboard') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('user.dashboard') %>">
-                    <i data-feather="home"></i>
-                    <div>
-                        <span class="nav-title">Dashboard</span>
-                        <small>At-a-glance metrics & alerts</small>
-                    </div>
+<div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
+    <div class="navbar-header">
+        <ul class="nav navbar-nav flex-row">
+            <li class="nav-item me-auto">
+                <a class="navbar-brand" href="<%= generateUrl('user.dashboard') %>">
+                    <span class="brand-logo">
+                        <!-- <img src="/images/express-basic-setup.png" style="max-width: 150px; max-height: 75px; background-color: rgb(148, 148, 148);"  alt="logo"> -->
+                    <!-- </span> -->
+                    <h2 class="brand-text">
+                        <%= project_name %>
+                    </h2>
+                    </span>
                 </a>
             </li>
         </ul>
+    </div>
+    <!-- <div class="shadow-bottom"></div> -->
+    <br><br>
+    <div class="main-menu-content">
+        <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+            <li class="<%=(page_name == 'user-dashboard') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('user.dashboard') %>">
+                    <i data-feather="home"></i>
+                    <span class="menu-title text-truncate" data-i18n="Dashboard">Dashboard</span>
+                </a>
+            </li>
 
-        <p class="nav-drawer__label">Content & communication</p>
-        <ul class="nav-drawer__list">
-            <li class="nav-drawer__item <%= (page_name == 'cms-management')||(page_name == 'contact-us-management')||(page_name == 'faq-management')||(page_name == 'landing-page-cms-management') ? 'is-active' : '' %>">
-                <div class="nav-drawer__link nav-drawer__link--parent">
+           
+
+            <li class=" navigation-header"><span data-i18n="Apps &amp; Pages">Apps &amp; Pages</span><i
+                    data-feather="more-horizontal"></i></li>
+
+            <!-- <li class="<%=(page_name == 'user-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.user.listing') %>">
+                    <i data-feather="user"></i>
+                    <span class="menu-item text-truncate" data-i18n="Users">User Management</span>
+                </a>
+            </li> -->
+
+           
+            <li class="<%=(page_name == 'cms-management')||(page_name == 'contact-us-management')||(page_name == 'faq-management')||(page_name == 'landing-page-cms-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center">
                     <i data-feather='sidebar'></i>
-                    <div>
-                        <span class="nav-title">CMS Management</span>
-                        <small>Control pages, FAQs, and static copy</small>
-                    </div>
-                </div>
-                <ul class="nav-drawer__sublist">
-                    <li class="<%= (page_name == 'cms-management') ? 'is-active' : '' %>">
-                        <a class="nav-drawer__sublink" href="<%= generateUrl('admin.cms.list') %>">
+                    <span class="menu-title text-truncate" data-i18n="User">CMS Management</span>
+                </a>
+                <ul class="menu-content">
+                    <li class="<%=(page_name == 'cms-management') ? 'active' : ''%>">
+                        <a class="d-flex align-items-center" href="<%= generateUrl('admin.cms.list') %>">
                             <i data-feather="circle"></i>
-                            General CMS
+                            <span class="menu-item text-truncate" data-i18n="General CMS">General</span>
                         </a>
                     </li>
-                    <li class="<%= (page_name == 'faq-management') ? 'is-active' : '' %>">
-                        <a class="nav-drawer__sublink" href="<%= generateUrl('admin.faq.listing') %>">
+                
+                    <li class="<%=(page_name == 'faq-management') ? 'active' : ''%> nav-item">
+                        <a class="d-flex align-items-center" href="<%= generateUrl('admin.faq.listing') %>">
                             <i data-feather='help-circle'></i>
-                            FAQ
+                            <span class="menu-title text-truncate" data-i18n="FAQ">FAQ</span>
                         </a>
                     </li>
+                   
                 </ul>
             </li>
-            <li class="nav-drawer__item <%= (page_name == 'category-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.category.listing') %>">
+            <li class="<%=(page_name == 'category-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.category.listing') %>">
                     <i data-feather="bar-chart"></i>
-                    <div>
-                        <span class="nav-title">Category management</span>
-                        <small>Organize offers for discovery</small>
-                    </div>
+                    <span class="menu-item text-truncate" data-i18n="Category Management">Category Management</span>
                 </a>
             </li>
-            <li class="nav-drawer__item <%= (page_name == 'deal-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.deal.listing') %>">
-                    <i data-feather="briefcase"></i>
-                    <div>
-                        <span class="nav-title">Deal management</span>
-                        <small>Review, approve, and adjust deals</small>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-drawer__item <%= (page_name == 'post-deal') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('deal.post.form') %>">
-                    <i data-feather="external-link"></i>
-                    <div>
-                        <span class="nav-title">Post a deal</span>
-                        <small>Launch a new promotion fast</small>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-drawer__item <%= (page_name == 'keyword-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.keyword.listing') %>">
-                    <i data-feather="key"></i>
-                    <div>
-                        <span class="nav-title">Keyword management</span>
-                        <small>Improve search relevancy</small>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-drawer__item <%= (page_name == 'notification-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.notification.compose') %>">
-                    <i data-feather="bell"></i>
-                    <div>
-                        <span class="nav-title">Notifications</span>
-                        <small>Engage customers and providers</small>
-                    </div>
-                </a>
-            </li>
-        </ul>
 
-        <p class="nav-drawer__label">Revenue & governance</p>
-        <ul class="nav-drawer__list">
-            <li class="nav-drawer__item <%= (page_name == 'payment-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.payment.listing') %>">
-                    <i data-feather="credit-card"></i>
-                    <div>
-                        <span class="nav-title">Payment management</span>
-                        <small>Track settlements and payouts</small>
-                    </div>
+            <li class="<%=(page_name == 'deal-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.deal.listing') %>">
+                    <i data-feather="briefcase"></i>
+                    <span class="menu-item text-truncate" data-i18n="Deal Form">Deal Management</span>
                 </a>
             </li>
-            <li class="nav-drawer__item <%= (page_name == 'transaction-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('admin.transaction.listing') %>">
-                    <i data-feather="activity"></i>
-                    <div>
-                        <span class="nav-title">Transactions</span>
-                        <small>Audit trails and status checks</small>
-                    </div>
+            <li class="<%=(page_name == 'post-deal') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('deal.post.form') %>">
+                    <i data-feather="external-link"></i>
+                    <span class="menu-item text-truncate" data-i18n="Post Deal">Post Deal</span>
                 </a>
             </li>
-            <li class="nav-drawer__item <%= (page_name == 'settings-management') ? 'is-active' : '' %>">
-                <a class="nav-drawer__link" href="<%= generateUrl('settings.edit') %>">
+            <li class="<%=(page_name == 'keyword-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.keyword.listing') %>">
+                    <i data-feather="key"></i>
+                    <span class="menu-item text-truncate" data-i18n="Keyword">Keyword Management</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'payment-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.payment.listing') %>">
+                    <i data-feather="dollar-sign"></i>
+                    <span class="menu-item text-truncate" data-i18n="Payment">Payment Management</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'notification-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.notification.compose') %>">
+                    <i data-feather="bell"></i>
+                    <span class="menu-item text-truncate" data-i18n="Notifications">Notifications</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'transaction-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.transaction.listing') %>">
+                    <i data-feather="dollar-sign"></i>
+                    <span class="menu-item text-truncate" data-i18n="Payment">Transaction</span>
+                </a>
+            </li>
+            <li class="<%=(page_name == 'settings-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('settings.edit') %>">
                     <i data-feather="settings"></i>
-                    <div>
-                        <span class="nav-title">Settings</span>
-                        <small>Governance, roles, and defaults</small>
-                    </div>
+                    <span class="menu-item text-truncate" data-i18n="Settings">Settings</span>
                 </a>
             </li>
+
         </ul>
     </div>
-</aside>
+</div>
