@@ -1,12 +1,10 @@
-import { BASE_URL, DEALS_BASE_URL as ENV_DEALS_BASE_URL } from '@env';
+import { BASE_URL } from '@env';
 
-const DEFAULT_BASE_URL = 'https://api.sysavings.com';
-
-export const DEFAULT_DEALS_BASE_URL = DEFAULT_BASE_URL;
-export const DEFAULT_API_BASE_URL = DEFAULT_BASE_URL;
+export const DEFAULT_DEALS_BASE_URL = 'https://api.sysavings.com';
+export const DEFAULT_API_BASE_URL = DEFAULT_DEALS_BASE_URL;
 
 export const API_BASE_URL = BASE_URL || DEFAULT_API_BASE_URL;
-export const DEALS_BASE_URL = ENV_DEALS_BASE_URL || API_BASE_URL;
+export const DEALS_BASE_URL = DEFAULT_DEALS_BASE_URL;
 
 export const API = {
   auth: {
