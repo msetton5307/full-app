@@ -21,27 +21,6 @@ import {useAppDispatch} from '@app/redux';
 import {getMergedJsonDeals} from '@app/utils/service/UserService';
 import {RootTabParamList} from '@app/types';
 
-const placeholderHotDeals = [
-  {
-    id: 'hot-1',
-    deal_title: 'Admin Pick: Summer Savings Bundle',
-    description: 'Curated picks hand-selected for the best value.',
-    discount: 'Up to 40% off',
-    discounted_price: '29.99',
-    deal_price: 29.99,
-    product_link: '#',
-  },
-  {
-    id: 'hot-2',
-    deal_title: 'Editor’s Choice: Everyday Essentials',
-    description: 'Top-rated items bundled for everyday use.',
-    discount: 'Save $15',
-    discounted_price: '49.99',
-    deal_price: 49.99,
-    product_link: '#',
-  },
-];
-
 const placeholderStores = [
   {
     id: 'store-1',
@@ -302,7 +281,6 @@ const Deals = () => {
     );
   }, [activeTab, animateIndicatorTo, handleTabPress, indicatorPosition, tabWidth, tabs]);
 
-  const hotDeals = useMemo(() => placeholderHotDeals, []);
   const stores = useMemo(() => placeholderStores, []);
 
   const renderHotDeals = useCallback(() => {
@@ -311,30 +289,39 @@ const Deals = () => {
         <Text style={style.sectionHeading}>Hot Deals</Text>
         <FlatList
           key="hot-deals"
-          data={hotDeals}
-          horizontal
-          keyExtractor={(item, index) => `${item.id}_${index}`}
+          showsVerticalScrollIndicator={false}
+          data={lists}
+          keyExtractor={keyExtractor}
           renderItem={({item, index}) => {
+            const itemId =
+              item?._id || item?.deal_id || item?.id || item?.dealId || item?.dealID;
+            const shouldAutoOpen =
+              autoOpenDealId && itemId && String(itemId) === autoOpenDealId;
+
             return (
-              <View style={[style.horizontalCard]}>
-                <ProductCard
-                  enableModal={true}
-                  item={item}
-                  key={index}
-                  jsonData={false}
-                  autoOpenModal={false}
-                  containerStyle={style.hotDealCard}
-                />
-              </View>
+              <ProductCard
+                enableModal={true}
+                item={item}
+                key={index}
+                jsonData={true}
+                autoOpenModal={!!shouldAutoOpen}
+                onModalOpen={() => {
+                  setAutoOpenDealId(undefined);
+                  setPendingDealId(undefined);
+                  navigation.setParams?.({dealId: undefined});
+                }}
+              />
             );
           }}
-          showsHorizontalScrollIndicator={false}
+          numColumns={2}
           ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
-          contentContainerStyle={style.horizontalList}
+          contentContainerStyle={style.flatcontainer}
+          columnWrapperStyle={Css.jcsb}
+          scrollEnabled={false}
         />
       </View>
     );
-  }, [hotDeals]);
+  }, [autoOpenDealId, keyExtractor, lists, navigation]);
 
   const renderNewDeals = useCallback(() => {
     return (
@@ -506,18 +493,6 @@ const style = StyleSheet.create({
     fontFamily: Fonts.PoppinsSemiBold,
     color: Colors.black,
     marginBottom: moderateScale(10),
-  },
-  horizontalList: {
-    paddingBottom: moderateScale(10),
-    paddingHorizontal: moderateScale(4),
-  },
-  horizontalCard: {
-    width: moderateScale(200),
-    marginRight: moderateScale(12),
-  },
-  hotDealCard: {
-    width: '100%',
-    alignSelf: 'stretch',
   },
   loadingContainer: {
     paddingVertical: moderateScale(30),
