@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 import _ from 'lodash';
 import {Colors, Fonts} from '../../../themes';
@@ -11,6 +11,45 @@ import {RouteProp, useIsFocused, useNavigation, useRoute} from '@react-navigatio
 import {useAppDispatch} from '@app/redux';
 import {getMergedJsonDeals} from '@app/utils/service/UserService';
 import {RootTabParamList} from '@app/types';
+
+const placeholderHotDeals = [
+  {
+    id: 'hot-1',
+    deal_title: 'Admin Pick: Summer Savings Bundle',
+    description: 'Curated picks hand-selected for the best value.',
+    discount: 'Up to 40% off',
+    discounted_price: '29.99',
+    deal_price: 29.99,
+    product_link: '#',
+  },
+  {
+    id: 'hot-2',
+    deal_title: 'Editor’s Choice: Everyday Essentials',
+    description: 'Top-rated items bundled for everyday use.',
+    discount: 'Save $15',
+    discounted_price: '49.99',
+    deal_price: 49.99,
+    product_link: '#',
+  },
+];
+
+const placeholderStores = [
+  {
+    id: 'store-1',
+    name: 'Amazon',
+    promo: 'Lightning deals and Prime member exclusives live now.',
+  },
+  {
+    id: 'store-2',
+    name: 'Best Buy',
+    promo: 'Weekend doorbusters on laptops, TVs, and accessories.',
+  },
+  {
+    id: 'store-3',
+    name: 'Walmart',
+    promo: 'Rollback specials on essentials and back-to-school gear.',
+  },
+];
 
 const Deals = () => {
   const isFocused = useIsFocused();
@@ -146,6 +185,9 @@ const Deals = () => {
     );
   }, []);
 
+  const hotDeals = useMemo(() => placeholderHotDeals, []);
+  const stores = useMemo(() => placeholderStores, []);
+
   return (
     <GeneralTemplate
       searchValue={search}
@@ -163,39 +205,76 @@ const Deals = () => {
         }
       }}
       fixedComponent={<HeaderComponent />}
-      
       >
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={lists}
-        keyExtractor={keyExtractor}
-        renderItem={({item, index}) => {
-          const itemId =
-            item?._id || item?.deal_id || item?.id || item?.dealId || item?.dealID;
-          const shouldAutoOpen =
-            autoOpenDealId && itemId && String(itemId) === autoOpenDealId;
+      <View style={style.sectionContainer}>
+        <Text style={style.sectionHeading}>Hot</Text>
+        <FlatList
+          horizontal
+          data={hotDeals}
+          keyExtractor={(item, index) => `${item.id}_${index}`}
+          renderItem={({item, index}) => (
+            <View style={style.horizontalCard}>
+              <ProductCard
+                enableModal={false}
+                item={item}
+                key={index}
+                jsonData={false}
+                autoOpenModal={false}
+              />
+            </View>
+          )}
+          showsHorizontalScrollIndicator={false}
+          ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
+          contentContainerStyle={style.horizontalList}
+        />
+      </View>
 
-          return (
-            <ProductCard
-              enableModal={true}
-              item={item}
-              key={index}
-              jsonData={true}
-              autoOpenModal={!!shouldAutoOpen}
-              onModalOpen={() => {
-                setAutoOpenDealId(undefined);
-                setPendingDealId(undefined);
-                navigation.setParams?.({dealId: undefined});
-              }}
-            />
-          );
-        }}
-        numColumns={2}
-        ListEmptyComponent={<Text style={style.empty}>{`No data found.`}</Text>}
-        contentContainerStyle={style.flatcontainer}
-        columnWrapperStyle={Css.jcsb}
-        scrollEnabled={false}
-      />
+      <View style={style.sectionContainer}>
+        <Text style={style.sectionHeading}>New</Text>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={lists}
+          keyExtractor={keyExtractor}
+          renderItem={({item, index}) => {
+            const itemId =
+              item?._id || item?.deal_id || item?.id || item?.dealId || item?.dealID;
+            const shouldAutoOpen =
+              autoOpenDealId && itemId && String(itemId) === autoOpenDealId;
+
+            return (
+              <ProductCard
+                enableModal={true}
+                item={item}
+                key={index}
+                jsonData={true}
+                autoOpenModal={!!shouldAutoOpen}
+                onModalOpen={() => {
+                  setAutoOpenDealId(undefined);
+                  setPendingDealId(undefined);
+                  navigation.setParams?.({dealId: undefined});
+                }}
+              />
+            );
+          }}
+          numColumns={2}
+          ListEmptyComponent={<Text style={style.empty}>{`No data found.`}</Text>}
+          contentContainerStyle={style.flatcontainer}
+          columnWrapperStyle={Css.jcsb}
+          scrollEnabled={false}
+        />
+      </View>
+
+      <View style={style.sectionContainer}>
+        <Text style={style.sectionHeading}>Stores</Text>
+        <View style={style.storeGrid}>
+          {stores.map(store => (
+            <View key={store.id} style={style.storeCard}>
+              <Text style={style.storeName}>{store.name}</Text>
+              <Text style={style.storePromo}>{store.promo}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
     </GeneralTemplate>
   );
 };
@@ -218,7 +297,7 @@ const style = StyleSheet.create({
     fontFamily: Fonts.PoppinsSemiBold,
     fontSize: moderateScale(17),
     // paddingVertical: moderateScale(20),
-    marginTop: moderateScale(15)
+    marginTop: moderateScale(15),
   },
   tabContainer: {
     flexDirection: 'row',
@@ -241,5 +320,49 @@ const style = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.PoppinsSemiBold,
     textAlign: 'center',
+  },
+  sectionContainer: {
+    marginTop: moderateScale(16),
+  },
+  sectionHeading: {
+    fontSize: moderateScale(16),
+    fontFamily: Fonts.PoppinsSemiBold,
+    color: Colors.black,
+    marginBottom: moderateScale(10),
+  },
+  horizontalList: {
+    paddingBottom: moderateScale(10),
+  },
+  horizontalCard: {
+    width: moderateScale(180),
+    marginRight: moderateScale(12),
+  },
+  storeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  storeCard: {
+    width: '48%',
+    backgroundColor: Colors.white,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(12),
+    marginBottom: moderateScale(12),
+    shadowColor: Colors.black,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: moderateScale(4),
+    elevation: 2,
+  },
+  storeName: {
+    fontFamily: Fonts.PoppinsSemiBold,
+    fontSize: moderateScale(15),
+    color: Colors.black,
+    marginBottom: moderateScale(4),
+  },
+  storePromo: {
+    fontFamily: Fonts.PoppinsRegular,
+    fontSize: moderateScale(13),
+    color: Colors.black_olive,
   },
 });
