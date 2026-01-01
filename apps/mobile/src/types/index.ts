@@ -14,6 +14,13 @@ export type RootStackParamList = {
         description?: string;
       }
     | undefined;
+  CollectionDeals: {
+    collectionId: string;
+    title: string;
+    description?: string;
+    coverImage?: string;
+    coverImageUrl?: string;
+  };
   Profile: undefined;
   EditProfile: undefined;
   Payout: undefined;

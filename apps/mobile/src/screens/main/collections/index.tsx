@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
@@ -8,15 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import GeneralTemplate from '../../../components/Template/GeneralTemplate';
-import ProductCard from '../../../components/Template/ProductCard';
 import {Colors, Fonts} from '../../../themes';
 import {moderateScale, verticalScale} from '../../../utils/orientation';
 import {useAppDispatch} from '@app/redux';
-import {
-  getCollectionDeals,
-  getCollections,
-} from '@app/utils/service/UserService';
+import {getCollections} from '@app/utils/service/UserService';
 import {IMAGES_BUCKET_URL} from '@app/utils/constants';
 
 interface CollectionType {
@@ -30,14 +26,10 @@ interface CollectionType {
 
 const Collections = () => {
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
 
   const [collections, setCollections] = useState<CollectionType[]>([]);
-  const [selectedCollection, setSelectedCollection] = useState<CollectionType | null>(
-    null,
-  );
-  const [collectionDeals, setCollectionDeals] = useState<any[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(false);
-  const [isLoadingDeals, setIsLoadingDeals] = useState(false);
 
   const resolveCoverImage = useCallback((collection: CollectionType) => {
     if (collection.coverImageUrl) {
@@ -52,24 +44,15 @@ const Collections = () => {
   }, []);
 
   const handleSelectCollection = useCallback(
-    async (collection: CollectionType) => {
-      setSelectedCollection(collection);
-      setIsLoadingDeals(true);
-      try {
-        const response = await dispatch(
-          getCollectionDeals({collectionId: collection._id}),
-        );
-
-        if (response.success) {
-          setCollectionDeals(response.data || []);
-        } else {
-          setCollectionDeals([]);
-        }
-      } finally {
-        setIsLoadingDeals(false);
-      }
+    (collection: CollectionType) => {
+      navigation.navigate('CollectionDeals', {
+        collectionId: collection._id,
+        title: collection.title,
+        description: collection.description,
+        coverImageUrl: resolveCoverImage(collection),
+      });
     },
-    [dispatch],
+    [navigation, resolveCoverImage],
   );
 
   const loadCollections = useCallback(async () => {
@@ -79,21 +62,13 @@ const Collections = () => {
       if (response.success) {
         const serverCollections: CollectionType[] = response.data || [];
         setCollections(serverCollections);
-        if (serverCollections.length) {
-          await handleSelectCollection(serverCollections[0]);
-        } else {
-          setSelectedCollection(null);
-          setCollectionDeals([]);
-        }
       } else {
         setCollections([]);
-        setSelectedCollection(null);
-        setCollectionDeals([]);
       }
     } finally {
       setIsLoadingCollections(false);
     }
-  }, [dispatch, handleSelectCollection]);
+  }, [dispatch]);
 
   useEffect(() => {
     loadCollections();
@@ -101,11 +76,10 @@ const Collections = () => {
 
   const collectionCard = useCallback(
     ({item}: {item: CollectionType}) => {
-      const isActive = selectedCollection?._id === item._id;
       return (
         <TouchableOpacity
           activeOpacity={0.8}
-          style={[style.collectionCard, isActive && style.collectionCardActive]}
+          style={style.collectionCard}
           onPress={() => handleSelectCollection(item)}>
           <Image
             source={{uri: resolveCoverImage(item)}}
@@ -123,22 +97,8 @@ const Collections = () => {
         </TouchableOpacity>
       );
     },
-    [handleSelectCollection, resolveCoverImage, selectedCollection?._id],
+    [handleSelectCollection, resolveCoverImage],
   );
-
-  const dealCard = useCallback(({item, index}: {item: any; index: number}) => {
-    return (
-      <View style={style.dealCardWrapper}>
-        <ProductCard
-          enableModal={true}
-          item={item}
-          key={`${item?._id || index}_${index}`}
-          jsonData={true}
-          autoOpenModal={false}
-        />
-      </View>
-    );
-  }, []);
 
   const collectionListEmpty = useMemo(() => {
     if (isLoadingCollections) {
@@ -151,24 +111,6 @@ const Collections = () => {
       </Text>
     );
   }, [isLoadingCollections]);
-
-  const dealsEmpty = useMemo(() => {
-    if (isLoadingDeals) {
-      return null;
-    }
-
-    if (!selectedCollection) {
-      return (
-        <Text style={style.emptyText}>Select a collection to view its deals.</Text>
-      );
-    }
-
-    return (
-      <Text style={style.emptyText}>
-        No deals are currently available for this collection.
-      </Text>
-    );
-  }, [isLoadingDeals, selectedCollection]);
 
   return (
     <GeneralTemplate
@@ -192,21 +134,6 @@ const Collections = () => {
         ItemSeparatorComponent={() => <View style={style.collectionSeparator} />}
         ListEmptyComponent={collectionListEmpty}
         scrollEnabled={false}
-      />
-
-      <View style={style.sectionHeader}>
-        <Text style={style.sectionTitle}>Deals</Text>
-        {isLoadingDeals && (
-          <ActivityIndicator size="small" color={Colors.Aztec_Gold} />
-        )}
-      </View>
-      <FlatList
-        data={collectionDeals}
-        keyExtractor={(item, index) => `${item?._id || index}_${index}`}
-        renderItem={dealCard}
-        scrollEnabled={false}
-        ItemSeparatorComponent={() => <View style={style.separator} />}
-        ListEmptyComponent={dealsEmpty}
       />
     </GeneralTemplate>
   );
@@ -237,14 +164,6 @@ const style = StyleSheet.create({
     marginTop: moderateScale(20),
     marginBottom: moderateScale(8),
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  separator: {
-    height: verticalScale(10),
-  },
   emptyText: {
     color: Colors.gray_1,
     fontFamily: Fonts.PoppinsMedium,
@@ -265,9 +184,6 @@ const style = StyleSheet.create({
     width: '48%',
     overflow: 'hidden',
   },
-  collectionCardActive: {
-    borderColor: Colors.Aztec_Gold,
-  },
   collectionImage: {
     width: '100%',
     height: moderateScale(120),
@@ -286,12 +202,5 @@ const style = StyleSheet.create({
     color: Colors.black_olive,
     fontFamily: Fonts.PoppinsMedium,
     fontSize: moderateScale(12),
-  },
-  dealCardWrapper: {
-    backgroundColor: Colors.white,
-    borderRadius: moderateScale(12),
-    borderWidth: moderateScale(1),
-    borderColor: Colors.Almond,
-    padding: moderateScale(4),
   },
 });

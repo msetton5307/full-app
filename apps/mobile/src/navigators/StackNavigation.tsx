@@ -24,6 +24,7 @@ import FavouriteDeals from '../screens/main/profile/FavouriteDeals';
 import ContactUs from '../screens/main/profile/ContactUs';
 import EditPost from '@app/screens/main/post/EditPost';
 import DealDetails from '@app/screens/main/deals/DealDetails';
+import CollectionDeals from '@app/screens/main/collections/CollectionDeals';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -61,6 +62,7 @@ export default function StackNavigation() {
     ContactUs: ContactUs,
     EditPost: EditPost,
     DealDetails: DealDetails,
+    CollectionDeals: CollectionDeals,
   };
 
   // console.log(

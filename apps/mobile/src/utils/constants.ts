@@ -1,8 +1,7 @@
 import { BASE_URL } from '@env';
 
-export const DEFAULT_API_BASE_URL =
-  'https://griffon-destined-martin.ngrok-free.app';
 export const DEFAULT_DEALS_BASE_URL = 'https://api.sysavings.com';
+export const DEFAULT_API_BASE_URL = DEFAULT_DEALS_BASE_URL;
 
 export const API_BASE_URL = BASE_URL || DEFAULT_API_BASE_URL;
 export const DEALS_BASE_URL = DEFAULT_DEALS_BASE_URL;
