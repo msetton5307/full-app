@@ -2,10 +2,12 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Image,
   Modal,
+  StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
   SafeAreaView,
   ScrollView,
   Linking,
@@ -41,6 +43,7 @@ export interface ProductCardInterface {
   autoOpenModal?: boolean;
   onModalOpen?: () => void;
   onModalClose?: () => void;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 const formatPrice = (amount: number): string => {
@@ -94,6 +97,7 @@ const ProductCard = ({
   autoOpenModal = false,
   onModalOpen,
   onModalClose,
+  containerStyle = {},
 }: ProductCardInterface) => {
   const [details, setDetails] = useState<ProductDetails>({
     brand_logo: '',
@@ -441,12 +445,33 @@ const ProductCard = ({
   const modalProductLink = productDetails?.product_link || details?.product_link;
   const modalBrandLogo = productDetails?.brand_logo || details?.brand_logo;
   const hasDealId = Boolean(currentDealId);
+  const formattedDiscount = useMemo(() => {
+    const discount = details?.discount?.toString().trim();
+
+    if (!discount) {
+      return '';
+    }
+
+    const hasPercentOrOff = /%|off/i.test(discount);
+    const startsWithSave = /^save/i.test(discount);
+
+    if (hasPercentOrOff || startsWithSave) {
+      return discount;
+    }
+
+    const numericValue = Number(discount);
+    if (!Number.isNaN(numericValue)) {
+      return `${numericValue}% off`;
+    }
+
+    return `${discount} off`;
+  }, [details?.discount]);
 
   return (
     <>
       <TouchableOpacity
         disabled={!enableModal}
-        style={styles.mainContainer}
+        style={[styles.mainContainer, containerStyle]}
         onPress={() => getProductDetails(item)}>
         <View
           style={{
@@ -519,9 +544,9 @@ const ProductCard = ({
           </Text>
         )}
 
-        {details?.discount && (
+        {formattedDiscount && (
           <View style={styles.offView}>
-            <Text style={styles.offText}>{`${details?.discount}% off`}</Text>
+            <Text style={styles.offText}>{formattedDiscount}</Text>
           </View>
         )}
         <View style={styles.priceView}>
