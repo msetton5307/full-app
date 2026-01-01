@@ -35,6 +35,10 @@ export const API = {
     update: 'api/user/settings/update',
     notification: 'api/user/notification/listing',
   },
+  collection: {
+    listing: 'api/collection/listing',
+    deals: (id: string) => `api/collection/${id}/deals`,
+  },
   notifications: {
     sendLatestDeal: 'api/notification/latest-deal',
   },
@@ -73,4 +77,5 @@ export const IMAGES_BUCKET_URL = {
   category: `${API_BASE_URL}/uploads/category`,
   brand: `${API_BASE_URL}/uploads/`,
   deals: `${API_BASE_URL}/uploads/DealImages/`,
+  collections: `${API_BASE_URL}/uploads/collections/`,
 };

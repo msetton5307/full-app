@@ -61,7 +61,7 @@ class CollectionController {
 
   async renderAddCollectionPage(req, res) {
     try {
-      const deals = await DealRepo.getAllByField({ isDeleted: false, status: 'Approved' });
+      const deals = await DealRepo.getAllByField({ isDeleted: false });
       res.render('collection/views/add', {
         page_name: 'collection-management',
         page_title: 'Add Collection',
@@ -126,7 +126,7 @@ class CollectionController {
         return res.redirect(namedRouter.urlFor('admin.collection.listing'));
       }
 
-      const deals = await DealRepo.getAllByField({ isDeleted: false, status: 'Approved' });
+      const deals = await DealRepo.getAllByField({ isDeleted: false });
 
       res.render('collection/views/edit', {
         page_name: 'collection-management',
