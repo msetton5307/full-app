@@ -38,6 +38,8 @@ interface GeneralTemplateInterface {
   title?: string;
   isRefreshing?: boolean;
   onRefresh?: () => void;
+  scrollRef?: React.RefObject<ScrollView>;
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
 const GeneralTemplate = ({
@@ -55,6 +57,8 @@ const GeneralTemplate = ({
   title = '',
   isRefreshing = false,
   onRefresh = () => {},
+  scrollRef,
+  onScroll,
 }: GeneralTemplateInterface) => {
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
@@ -67,6 +71,8 @@ const GeneralTemplate = ({
     if (isCloseToBottom) {
       scrollEnd();
     }
+
+    onScroll?.(event);
   };
 
   return (
@@ -98,6 +104,7 @@ const GeneralTemplate = ({
             }}>
             <View style={Css.w100}>{fixedComponent}</View>
             <ScrollView
+              ref={scrollRef}
               style={{
                 flex: 1,
               }}

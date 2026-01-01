@@ -1,6 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  Animated,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import _ from 'lodash';
 import {Colors, Fonts} from '../../../themes';
 import {moderateScale, verticalScale} from '../../../utils/orientation';
@@ -51,11 +61,18 @@ const placeholderStores = [
   },
 ];
 
+type TabKey = 'pzpicks' | 'hot' | 'stores';
+
 const Deals = () => {
   const isFocused = useIsFocused();
   const route = useRoute<RouteProp<RootTabParamList, 'Deals'>>();
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+  const scrollRef = useRef<ScrollView | null>(null);
+  const sectionPositions = useRef<Partial<Record<TabKey, number>>>({});
+  const [activeTab, setActiveTab] = useState<TabKey>('pzpicks');
+  const [tabWidth, setTabWidth] = useState<number>(0);
+  const indicatorPosition = useRef(new Animated.Value(0)).current;
 
   const [lists, setList] = useState<any[]>([]);
   const [search, setSearch] = useState('');
@@ -177,13 +194,128 @@ const Deals = () => {
     [getAllDeals],
   );
 
+  const tabs: {key: TabKey; label: string}[] = useMemo(
+    () => [
+      {key: 'pzpicks', label: 'PzPicks'},
+      {key: 'hot', label: 'Hot Deals'},
+      {key: 'stores', label: 'Stores'},
+    ],
+    [],
+  );
+
+  const animateIndicatorTo = useCallback(
+    (index: number) => {
+      if (tabWidth === 0) {
+        return;
+      }
+
+      Animated.timing(indicatorPosition, {
+        toValue: tabWidth * index,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    },
+    [indicatorPosition, tabWidth],
+  );
+
+  useEffect(() => {
+    const tabIndex = tabs.findIndex(tab => tab.key === activeTab);
+    if (tabIndex >= 0) {
+      animateIndicatorTo(tabIndex);
+    }
+  }, [activeTab, animateIndicatorTo, tabs]);
+
+  const scrollToSection = useCallback(
+    (key: TabKey) => {
+      const yOffset = sectionPositions.current[key] ?? 0;
+      scrollRef.current?.scrollTo({y: yOffset, animated: true});
+      setActiveTab(key);
+
+      const tabIndex = tabs.findIndex(tab => tab.key === key);
+      if (tabIndex >= 0) {
+        animateIndicatorTo(tabIndex);
+      }
+    },
+    [animateIndicatorTo, tabs],
+  );
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetY = event?.nativeEvent?.contentOffset?.y ?? 0;
+      const positions = sectionPositions.current;
+      const entries = Object.entries(positions).sort(
+        (a, b) => (a[1] ?? 0) - (b[1] ?? 0),
+      );
+
+      let currentTab: TabKey = 'pzpicks';
+
+      for (let i = 0; i < entries.length; i++) {
+        const [key, position] = entries[i];
+        const nextPosition = entries[i + 1]?.[1];
+
+        if (
+          typeof position === 'number' &&
+          offsetY >= position - 40 &&
+          (nextPosition === undefined || offsetY < nextPosition - 40)
+        ) {
+          currentTab = key as TabKey;
+          break;
+        }
+      }
+
+      if (currentTab !== activeTab) {
+        setActiveTab(currentTab);
+        const tabIndex = tabs.findIndex(tab => tab.key === currentTab);
+        if (tabIndex >= 0) {
+          animateIndicatorTo(tabIndex);
+        }
+      }
+    },
+    [activeTab, animateIndicatorTo, tabs],
+  );
+
   const HeaderComponent = useCallback(() => {
     return (
       <View>
         <Text style={style.textStyle}>Deals</Text>
+        <View
+          style={style.tabContainer}
+          onLayout={event => {
+            const {width} = event.nativeEvent.layout;
+            setTabWidth(width / tabs.length);
+          }}>
+          {tabs.map((tab, index) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                style={[style.tab, isActive && style.activeTab]}
+                onPress={() => scrollToSection(tab.key)}>
+                <Text
+                  style={[
+                    style.tabText,
+                    isActive ? style.activeTabText : style.inactiveTabText,
+                  ]}>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+          {tabWidth > 0 && (
+            <Animated.View
+              style={[
+                style.tabIndicator,
+                {
+                  width: tabWidth,
+                  transform: [{translateX: indicatorPosition}],
+                },
+              ]}
+            />
+          )}
+        </View>
       </View>
     );
-  }, []);
+  }, [activeTab, animateIndicatorTo, indicatorPosition, scrollToSection, tabWidth, tabs]);
 
   const hotDeals = useMemo(() => placeholderHotDeals, []);
   const stores = useMemo(() => placeholderStores, []);
@@ -205,32 +337,15 @@ const Deals = () => {
         }
       }}
       fixedComponent={<HeaderComponent />}
+      scrollRef={scrollRef}
+      onScroll={handleScroll}
       >
-      <View style={style.sectionContainer}>
-        <Text style={style.sectionHeading}>Hot</Text>
-        <FlatList
-          horizontal
-          data={hotDeals}
-          keyExtractor={(item, index) => `${item.id}_${index}`}
-          renderItem={({item, index}) => (
-            <View style={style.horizontalCard}>
-              <ProductCard
-                enableModal={false}
-                item={item}
-                key={index}
-                jsonData={false}
-                autoOpenModal={false}
-              />
-            </View>
-          )}
-          showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
-          contentContainerStyle={style.horizontalList}
-        />
-      </View>
-
-      <View style={style.sectionContainer}>
-        <Text style={style.sectionHeading}>New</Text>
+      <View
+        style={style.sectionContainer}
+        onLayout={event => {
+          sectionPositions.current.pzpicks = event.nativeEvent.layout.y;
+        }}>
+        <Text style={style.sectionHeading}>PzPicks</Text>
         <FlatList
           showsVerticalScrollIndicator={false}
           data={lists}
@@ -264,7 +379,38 @@ const Deals = () => {
         />
       </View>
 
-      <View style={style.sectionContainer}>
+      <View
+        style={style.sectionContainer}
+        onLayout={event => {
+          sectionPositions.current.hot = event.nativeEvent.layout.y;
+        }}>
+        <Text style={style.sectionHeading}>Hot Deals</Text>
+        <FlatList
+          horizontal
+          data={hotDeals}
+          keyExtractor={(item, index) => `${item.id}_${index}`}
+          renderItem={({item, index}) => (
+            <View style={style.horizontalCard}>
+              <ProductCard
+                enableModal={false}
+                item={item}
+                key={index}
+                jsonData={false}
+                autoOpenModal={false}
+              />
+            </View>
+          )}
+          showsHorizontalScrollIndicator={false}
+          ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
+          contentContainerStyle={style.horizontalList}
+        />
+      </View>
+
+      <View
+        style={style.sectionContainer}
+        onLayout={event => {
+          sectionPositions.current.stores = event.nativeEvent.layout.y;
+        }}>
         <Text style={style.sectionHeading}>Stores</Text>
         <View style={style.storeGrid}>
           {stores.map(store => (
@@ -301,25 +447,40 @@ const style = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(4),
+    position: 'relative',
     overflow: 'hidden',
-    justifyContent: 'space-between',
-    width: '100%',
-    alignSelf: 'center',
-    borderBottomColor: 'transparent',
-    borderBottomWidth: 2,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height: moderateScale(50),
-    borderBottomColor: Colors.Aztec_Gold,
+    paddingVertical: moderateScale(10),
   },
   tabText: {
-    color: Colors.black_olive,
     fontSize: moderateScale(14),
-    fontFamily: Fonts.PoppinsSemiBold,
+    fontFamily: Fonts.PoppinsMedium,
     textAlign: 'center',
+  },
+  activeTabText: {
+    color: Colors.white,
+    fontFamily: Fonts.PoppinsSemiBold,
+  },
+  inactiveTabText: {
+    color: Colors.black_olive,
+  },
+  activeTab: {
+    zIndex: 2,
+  },
+  tabIndicator: {
+    position: 'absolute',
+    height: '100%',
+    backgroundColor: Colors.Aztec_Gold,
+    borderRadius: moderateScale(12),
+    top: 0,
+    left: 0,
   },
   sectionContainer: {
     marginTop: moderateScale(16),
