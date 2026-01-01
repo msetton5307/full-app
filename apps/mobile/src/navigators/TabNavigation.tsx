@@ -48,6 +48,13 @@ const getTabBarIcon = (
   const iconColor = focused ? Colors.black : Colors.Old_Silver;
   const notificationIconSize = moderateScale(22);
   const defaultIconSize = moderateScale(20);
+  const labelStyle = {
+    color: focused ? Colors.Aztec_Gold : Colors.Old_Silver,
+    fontFamily: Fonts.PoppinsMedium,
+    fontSize: moderateScale(11),
+    marginTop: moderateScale(1),
+    textAlign: 'center' as const,
+  };
 
   if (item?.name === 'Notification') {
     return (
@@ -73,12 +80,9 @@ const getTabBarIcon = (
           />
         </Svg>
         <Text
-          style={{
-            color: focused ? Colors.Aztec_Gold : Colors.Old_Silver,
-            fontFamily: Fonts.PoppinsMedium,
-            fontSize: moderateScale(11),
-            marginTop: moderateScale(1),
-          }}>
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={labelStyle}>
           {item?.title}
         </Text>
       </View>
@@ -100,12 +104,9 @@ const getTabBarIcon = (
         resizeMode="contain"
       />
       <Text
-        style={{
-          color: focused ? Colors.Aztec_Gold : Colors.Old_Silver,
-          fontFamily: Fonts.PoppinsMedium,
-          fontSize: moderateScale(11),
-          marginTop: moderateScale(1),
-        }}>
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={labelStyle}>
         {item?.title}
       </Text>
     </View>
@@ -117,9 +118,10 @@ export default TabNav;
 const customStyles = (keyboardVisible: boolean) =>
   StyleSheet.create({
     tabBarStyle: {
-      paddingTop: '5%',
-      paddingHorizontal: '5%',
-      height: moderateScale(70),
+      paddingTop: moderateScale(12),
+      paddingHorizontal: moderateScale(14),
+      paddingBottom: moderateScale(10),
+      height: moderateScale(78),
       borderRadius: moderateScale(40),
       backgroundColor: Colors.white,
       width: '90%',
@@ -135,8 +137,9 @@ const customStyles = (keyboardVisible: boolean) =>
     iconContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      height: moderateScale(30),
-      width: moderateScale(80),
+      height: moderateScale(34),
+      minWidth: moderateScale(64),
+      paddingHorizontal: moderateScale(6),
     },
     iconStyle: {
       height: moderateScale(20),
