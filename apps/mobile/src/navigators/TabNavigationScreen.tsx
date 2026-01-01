@@ -1,6 +1,6 @@
 import Categories from '../screens/main/categories';
+import Collections from '../screens/main/collections';
 import Deals from '../screens/main/deals';
-import Home from '../screens/main/home';
 import Notification from '../screens/main/profile/Notification';
 import Flights from '../screens/main/flights';
 import Setting from '../screens/main/settings';
@@ -16,24 +16,23 @@ export interface TabNavigationScreenInterface {
 
 export const TabNavigationScreen: TabNavigationScreenInterface[] = [
   {
-    name: 'Home',
-    component: Home,
-    Icon: Icons.Home,
-    title: 'Home',
+    name: 'Deals',
+    component: Deals,
+    Icon: Icons.Deals,
+    title: 'Deals',
   },
-
+  {
+    name: 'Collections',
+    component: Collections,
+    Icon: Icons.favorite,
+    title: 'Collections',
+  },
   // {
   //   name: 'Categories',
   //   component: Categories,
   //   Icon: Icons.category,
   //   title: 'Categories',
   // },
-  {
-    name: 'Deals',
-    component: Deals,
-    Icon: Icons.Deals,
-    title: 'Deals',
-  },
   {
     name: 'Notification',
     component: Notification,

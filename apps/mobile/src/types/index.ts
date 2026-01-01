@@ -27,8 +27,8 @@ export type RootStackParamList = {
 };
 
 export type RootTabParamList = {
-  Home: undefined;
   Categories: undefined;
+  Collections: undefined;
   Deals: {dealId?: string} | undefined;
   Notification: undefined;
   Flights: undefined;
