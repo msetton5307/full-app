@@ -15,6 +15,8 @@ class CollectionController {
     this.getDealsForDropdown = this.getDealsForDropdown.bind(this);
     this.fetchDealsFromApi = this.fetchDealsFromApi.bind(this);
     this.normalizeApiDeal = this.normalizeApiDeal.bind(this);
+    this.renderAddCollectionPage = this.renderAddCollectionPage.bind(this);
+    this.renderEditpage = this.renderEditpage.bind(this);
   }
 
   async list(req, res) {
