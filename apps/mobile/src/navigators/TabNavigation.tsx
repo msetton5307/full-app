@@ -56,6 +56,32 @@ const getTabBarIcon = (
     textAlign: 'center' as const,
   };
 
+  if (item?.name === 'Flights') {
+    return (
+      <View style={styles.iconContainer}>
+        <Svg
+          width={defaultIconSize}
+          height={defaultIconSize}
+          viewBox="0 0 24 24"
+          fill="none">
+          <Path
+            d="M3 12.5 10.5 14l2 7 2-5.5 5.5 3.5L21.5 17 17 12l4.5-5-.5-2-5.5 3.5-2-5.5-2 7L3 11.5Z"
+            fill={iconColor}
+            stroke={iconColor}
+            strokeWidth={0.8}
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={labelStyle}>
+          {item?.title}
+        </Text>
+      </View>
+    );
+  }
+
   if (item?.name === 'Notification') {
     return (
       <View style={styles.iconContainer}>
