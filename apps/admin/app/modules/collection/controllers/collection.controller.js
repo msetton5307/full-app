@@ -5,11 +5,17 @@ const namedRouter = routeLabel(router);
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+const axios = require('axios');
 const CollectionRepo = require('../repositories/collection.repository');
 const DealRepo = require('../../deal/repositories/deal.repository');
+const SYSAVINGS_API_BASE_URL = 'https://api.sysavings.com';
 
 class CollectionController {
-  constructor() {}
+  constructor() {
+    this.getDealsForDropdown = this.getDealsForDropdown.bind(this);
+    this.fetchDealsFromApi = this.fetchDealsFromApi.bind(this);
+    this.normalizeApiDeal = this.normalizeApiDeal.bind(this);
+  }
 
   async list(req, res) {
     try {
@@ -61,7 +67,7 @@ class CollectionController {
 
   async renderAddCollectionPage(req, res) {
     try {
-      const deals = await DealRepo.getAllByField({ isDeleted: false });
+      const deals = await this.getDealsForDropdown();
       res.render('collection/views/add', {
         page_name: 'collection-management',
         page_title: 'Add Collection',
@@ -126,7 +132,7 @@ class CollectionController {
         return res.redirect(namedRouter.urlFor('admin.collection.listing'));
       }
 
-      const deals = await DealRepo.getAllByField({ isDeleted: false });
+      const deals = await this.getDealsForDropdown();
 
       res.render('collection/views/edit', {
         page_name: 'collection-management',
@@ -189,6 +195,37 @@ class CollectionController {
       console.log(err);
       throw err;
     }
+  }
+
+  async getDealsForDropdown(limit = 1000) {
+    try {
+      const apiDeals = await this.fetchDealsFromApi(limit);
+      if (apiDeals.length) {
+        return apiDeals;
+      }
+    } catch (error) {
+      // If the external API is unavailable, fall back to the local database.
+    }
+
+    return DealRepo.getAllByField({ isDeleted: false });
+  }
+
+  async fetchDealsFromApi(limit = 1000) {
+    const { data: responseData } = await axios.get(`${SYSAVINGS_API_BASE_URL}/api/mergeJSON/paginated`, {
+      params: { page: 1, limit },
+    });
+
+    const dealsFromApi = responseData?.data || responseData?.results || responseData;
+    const apiDeals = Array.isArray(dealsFromApi) ? dealsFromApi : [];
+
+    return apiDeals.map((item, index) => this.normalizeApiDeal(item, index));
+  }
+
+  normalizeApiDeal(item, index) {
+    return {
+      _id: item._id || item.id || item.Id || item.ID || `${index}`,
+      deal_title: item.Name || item.title || item.deal_title || 'Untitled Deal',
+    };
   }
 
   async statusChange(req, res) {
