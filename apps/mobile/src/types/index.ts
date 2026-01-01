@@ -31,7 +31,7 @@ export type RootTabParamList = {
   Categories: undefined;
   Deals: {dealId?: string} | undefined;
   Notification: undefined;
-  PriceTrackers: undefined;
+  Flights: undefined;
   Setting: undefined;
 };
 

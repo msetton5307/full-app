@@ -2,7 +2,7 @@ import Categories from '../screens/main/categories';
 import Deals from '../screens/main/deals';
 import Home from '../screens/main/home';
 import Notification from '../screens/main/profile/Notification';
-import PriceTrackers from '../screens/main/priceTrackers';
+import Flights from '../screens/main/flights';
 import Setting from '../screens/main/settings';
 import {Icons} from '../themes';
 import {RootTabParamList} from '../types';
@@ -41,10 +41,10 @@ export const TabNavigationScreen: TabNavigationScreenInterface[] = [
     title: 'Notifications',
   },
   {
-    name: 'PriceTrackers',
-    component: PriceTrackers,
+    name: 'Flights',
+    component: Flights,
     Icon: Icons.favorite,
-    title: 'Price Trackers',
+    title: 'Flights',
   },
   {
     name: 'Setting',
