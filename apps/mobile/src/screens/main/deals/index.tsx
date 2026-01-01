@@ -3,8 +3,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   Animated,
   FlatList,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -61,7 +59,7 @@ const placeholderStores = [
   },
 ];
 
-type TabKey = 'pzpicks' | 'hot' | 'stores';
+type TabKey = 'hot' | 'new' | 'stores';
 
 const Deals = () => {
   const isFocused = useIsFocused();
@@ -69,8 +67,7 @@ const Deals = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const scrollRef = useRef<ScrollView | null>(null);
-  const sectionPositions = useRef<Partial<Record<TabKey, number>>>({});
-  const [activeTab, setActiveTab] = useState<TabKey>('pzpicks');
+  const [activeTab, setActiveTab] = useState<TabKey>('hot');
   const [tabWidth, setTabWidth] = useState<number>(0);
   const indicatorPosition = useRef(new Animated.Value(0)).current;
 
@@ -196,8 +193,8 @@ const Deals = () => {
 
   const tabs: {key: TabKey; label: string}[] = useMemo(
     () => [
-      {key: 'pzpicks', label: 'PzPicks'},
-      {key: 'hot', label: 'Hot Deals'},
+      {key: 'hot', label: 'Hot'},
+      {key: 'new', label: 'New'},
       {key: 'stores', label: 'Stores'},
     ],
     [],
@@ -225,53 +222,18 @@ const Deals = () => {
     }
   }, [activeTab, animateIndicatorTo, tabs]);
 
-  const scrollToSection = useCallback(
+  const handleTabPress = useCallback(
     (key: TabKey) => {
-      const yOffset = sectionPositions.current[key] ?? 0;
-      scrollRef.current?.scrollTo({y: yOffset, animated: true});
       setActiveTab(key);
 
       const tabIndex = tabs.findIndex(tab => tab.key === key);
       if (tabIndex >= 0) {
         animateIndicatorTo(tabIndex);
       }
+
+      scrollRef.current?.scrollTo({y: 0, animated: false});
     },
     [animateIndicatorTo, tabs],
-  );
-
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const offsetY = event?.nativeEvent?.contentOffset?.y ?? 0;
-      const positions = sectionPositions.current;
-      const entries = Object.entries(positions).sort(
-        (a, b) => (a[1] ?? 0) - (b[1] ?? 0),
-      );
-
-      let currentTab: TabKey = 'pzpicks';
-
-      for (let i = 0; i < entries.length; i++) {
-        const [key, position] = entries[i];
-        const nextPosition = entries[i + 1]?.[1];
-
-        if (
-          typeof position === 'number' &&
-          offsetY >= position - 40 &&
-          (nextPosition === undefined || offsetY < nextPosition - 40)
-        ) {
-          currentTab = key as TabKey;
-          break;
-        }
-      }
-
-      if (currentTab !== activeTab) {
-        setActiveTab(currentTab);
-        const tabIndex = tabs.findIndex(tab => tab.key === currentTab);
-        if (tabIndex >= 0) {
-          animateIndicatorTo(tabIndex);
-        }
-      }
-    },
-    [activeTab, animateIndicatorTo, tabs],
   );
 
   const HeaderComponent = useCallback(() => {
@@ -290,7 +252,7 @@ const Deals = () => {
               <Pressable
                 key={tab.key}
                 style={[style.tab, isActive && style.activeTab]}
-                onPress={() => scrollToSection(tab.key)}>
+                onPress={() => handleTabPress(tab.key)}>
                 <Text
                   style={[
                     style.tabText,
@@ -315,37 +277,44 @@ const Deals = () => {
         </View>
       </View>
     );
-  }, [activeTab, animateIndicatorTo, indicatorPosition, scrollToSection, tabWidth, tabs]);
+  }, [activeTab, animateIndicatorTo, handleTabPress, indicatorPosition, tabWidth, tabs]);
 
   const hotDeals = useMemo(() => placeholderHotDeals, []);
   const stores = useMemo(() => placeholderStores, []);
 
-  return (
-    <GeneralTemplate
-      searchValue={search}
-      setSearchValue={(value: string) => {
-        console.log('value -- ', value);
-        setSearch(value);
-        debouncedSearch(value);
-      }}
-      isLoading={isLoading}
-      scrollEnd={() => {
-        if (!isLoading && hasMoreData) {
-          let _page = page + 1;
-          setPage(_page);
-          getAllDeals(_page);
-        }
-      }}
-      fixedComponent={<HeaderComponent />}
-      scrollRef={scrollRef}
-      onScroll={handleScroll}
-      >
-      <View
-        style={style.sectionContainer}
-        onLayout={event => {
-          sectionPositions.current.pzpicks = event.nativeEvent.layout.y;
-        }}>
-        <Text style={style.sectionHeading}>PzPicks</Text>
+  const renderHotDeals = useCallback(() => {
+    return (
+      <View style={style.sectionContainer}>
+        <Text style={style.sectionHeading}>Hot Deals</Text>
+        <FlatList
+          data={hotDeals}
+          horizontal
+          keyExtractor={(item, index) => `${item.id}_${index}`}
+          renderItem={({item, index}) => {
+            return (
+              <View style={[style.horizontalCard]}>
+                <ProductCard
+                  enableModal={true}
+                  item={item}
+                  key={index}
+                  jsonData={false}
+                  autoOpenModal={false}
+                />
+              </View>
+            );
+          }}
+          showsHorizontalScrollIndicator={false}
+          ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
+          contentContainerStyle={style.horizontalList}
+        />
+      </View>
+    );
+  }, [hotDeals]);
+
+  const renderNewDeals = useCallback(() => {
+    return (
+      <View style={style.sectionContainer}>
+        <Text style={style.sectionHeading}>New Deals</Text>
         <FlatList
           showsVerticalScrollIndicator={false}
           data={lists}
@@ -378,39 +347,12 @@ const Deals = () => {
           scrollEnabled={false}
         />
       </View>
+    );
+  }, [autoOpenDealId, keyExtractor, lists, navigation]);
 
-      <View
-        style={style.sectionContainer}
-        onLayout={event => {
-          sectionPositions.current.hot = event.nativeEvent.layout.y;
-        }}>
-        <Text style={style.sectionHeading}>Hot Deals</Text>
-        <FlatList
-          horizontal
-          data={hotDeals}
-          keyExtractor={(item, index) => `${item.id}_${index}`}
-          renderItem={({item, index}) => (
-            <View style={style.horizontalCard}>
-              <ProductCard
-                enableModal={false}
-                item={item}
-                key={index}
-                jsonData={false}
-                autoOpenModal={false}
-              />
-            </View>
-          )}
-          showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={<Text style={style.empty}>{`No hot deals yet.`}</Text>}
-          contentContainerStyle={style.horizontalList}
-        />
-      </View>
-
-      <View
-        style={style.sectionContainer}
-        onLayout={event => {
-          sectionPositions.current.stores = event.nativeEvent.layout.y;
-        }}>
+  const renderStores = useCallback(() => {
+    return (
+      <View style={style.sectionContainer}>
         <Text style={style.sectionHeading}>Stores</Text>
         <View style={style.storeGrid}>
           {stores.map(store => (
@@ -421,6 +363,45 @@ const Deals = () => {
           ))}
         </View>
       </View>
+    );
+  }, [stores]);
+
+  const renderActiveSection = useMemo(() => {
+    switch (activeTab) {
+      case 'hot':
+        return renderHotDeals();
+      case 'new':
+        return renderNewDeals();
+      case 'stores':
+        return renderStores();
+      default:
+        return null;
+    }
+  }, [activeTab, renderHotDeals, renderNewDeals, renderStores]);
+
+  return (
+    <GeneralTemplate
+      searchValue={search}
+      setSearchValue={(value: string) => {
+        console.log('value -- ', value);
+        setSearch(value);
+        if (activeTab === 'new') {
+          debouncedSearch(value);
+        }
+      }}
+      isLoading={isLoading}
+      scrollEnd={() => {
+        if (activeTab === 'new' && !isLoading && hasMoreData) {
+          let _page = page + 1;
+          setPage(_page);
+          getAllDeals(_page);
+        }
+      }}
+      fixedComponent={<HeaderComponent />}
+      scrollRef={scrollRef}
+      onScroll={undefined}
+      >
+      {renderActiveSection}
     </GeneralTemplate>
   );
 };
