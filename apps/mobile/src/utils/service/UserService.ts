@@ -8,6 +8,7 @@ import { setUserInfo } from '../../redux/slice/user.slice';
 import {
   ADD_DEAL_TYPE,
   CHANGE_PASSWORD_TYPE,
+  COLLECTION_DEALS_TYPE,
   DEAL_LIKE_TYPE,
   DEAL_LISTING_TYPE,
   JSON_LISTING_TYPE,
@@ -175,6 +176,58 @@ const getAllDealListing = (payload: DEAL_LISTING_TYPE) => {
         success: status === 200,
         message: data?.message,
         data: data?.data?.docs,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error?.response
+          ? `${error.response?.data?.error?.errorType}`
+          : `${error?.message}`,
+      };
+    }
+  };
+};
+
+const getCollections = () => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const result: AxiosResponse<any> = await instance.get(
+        listing.collection.listing,
+        dealManagementBaseConfig,
+      );
+
+      const { status, data } = result;
+
+      return {
+        success: status === 200 && data?.status === 200,
+        message: data?.message,
+        data: data?.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error?.response
+          ? `${error.response?.data?.error?.errorType}`
+          : `${error?.message}`,
+      };
+    }
+  };
+};
+
+const getCollectionDeals = (payload: COLLECTION_DEALS_TYPE) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const result: AxiosResponse<any> = await instance.get(
+        listing.collection.deals(payload.collectionId),
+        dealManagementBaseConfig,
+      );
+
+      const { status, data } = result;
+
+      return {
+        success: status === 200 && data?.status === 200,
+        message: data?.message,
+        data: data?.data,
       };
     } catch (error: any) {
       return {
@@ -683,4 +736,6 @@ export {
   getAllJsonDealListing,
   getAllDealListingMobile,
   getMergedJsonDeals,
+  getCollections,
+  getCollectionDeals,
 };

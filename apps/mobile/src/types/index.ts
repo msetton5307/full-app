@@ -147,6 +147,15 @@ export interface MERGE_JSON_LISTING_TYPE {
   pageSize?: number;
 }
 
+export interface COLLECTION_LISTING_TYPE {
+  page?: number;
+  length?: number;
+}
+
+export interface COLLECTION_DEALS_TYPE {
+  collectionId: string;
+}
+
 export interface DEAL_LIKE_TYPE {
   isLike: boolean;
   isDisLike: boolean;
