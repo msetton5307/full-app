@@ -239,7 +239,6 @@ const Deals = () => {
   const HeaderComponent = useCallback(() => {
     return (
       <View>
-        <Text style={style.textStyle}>Deals</Text>
         <View
           style={style.tabContainer}
           onLayout={event => {
@@ -287,6 +286,7 @@ const Deals = () => {
       <View style={style.sectionContainer}>
         <Text style={style.sectionHeading}>Hot Deals</Text>
         <FlatList
+          key="hot-deals"
           data={hotDeals}
           horizontal
           keyExtractor={(item, index) => `${item.id}_${index}`}
@@ -316,6 +316,7 @@ const Deals = () => {
       <View style={style.sectionContainer}>
         <Text style={style.sectionHeading}>New Deals</Text>
         <FlatList
+          key="new-deals"
           showsVerticalScrollIndicator={false}
           data={lists}
           keyExtractor={keyExtractor}
@@ -419,13 +420,6 @@ const style = StyleSheet.create({
     alignSelf: 'center',
     marginTop: verticalScale(100),
   },
-  textStyle: {
-    color: Colors.black,
-    fontFamily: Fonts.PoppinsSemiBold,
-    fontSize: moderateScale(17),
-    // paddingVertical: moderateScale(20),
-    marginTop: moderateScale(15),
-  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
@@ -444,6 +438,8 @@ const style = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.PoppinsMedium,
     textAlign: 'center',
+    alignSelf: 'center',
+    width: '100%',
   },
   activeTabText: {
     color: Colors.white,
