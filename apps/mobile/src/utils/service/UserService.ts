@@ -17,7 +17,7 @@ import {
   UPDATE_USER_INFORMATION,
 } from '@app/types';
 
-const { user, settings, listing, notifications } = API;
+const { user, settings, listing, notifications, collection } = API;
 
 const _header = {
   headers: {
@@ -192,7 +192,7 @@ const getCollections = () => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
-        listing.collection.listing,
+        collection.listing,
         dealManagementBaseConfig,
       );
 
@@ -218,7 +218,7 @@ const getCollectionDeals = (payload: COLLECTION_DEALS_TYPE) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.get(
-        listing.collection.deals(payload.collectionId),
+        collection.deals(payload.collectionId),
         dealManagementBaseConfig,
       );
 
