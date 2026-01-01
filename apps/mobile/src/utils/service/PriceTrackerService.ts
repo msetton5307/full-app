@@ -6,6 +6,12 @@ import {PRICE_TRACKER_PAYLOAD} from '@app/types';
 
 const {priceTracker} = API;
 
+const getErrorMessage = (error: any, fallback: string) =>
+  error?.response?.data?.message ||
+  error?.response?.data?.error?.errorType ||
+  error?.message ||
+  fallback;
+
 export const createPriceTracker = (payload: PRICE_TRACKER_PAYLOAD) => {
   return async (dispatch: Dispatch) => {
     try {
@@ -21,9 +27,7 @@ export const createPriceTracker = (payload: PRICE_TRACKER_PAYLOAD) => {
     } catch (error: any) {
       return {
         success: false,
-        message: error?.response
-          ? `${error.response?.data?.error?.errorType}`
-          : `${error?.message}`,
+        message: getErrorMessage(error, 'Unable to save tracker'),
       };
     }
   };
@@ -42,9 +46,7 @@ export const listPriceTrackers = () => {
     } catch (error: any) {
       return {
         success: false,
-        message: error?.response
-          ? `${error.response?.data?.error?.errorType}`
-          : `${error?.message}`,
+        message: getErrorMessage(error, 'Unable to load price trackers'),
       };
     }
   };
@@ -64,9 +66,7 @@ export const deletePriceTracker = (id: string) => {
     } catch (error: any) {
       return {
         success: false,
-        message: error?.response
-          ? `${error.response?.data?.error?.errorType}`
-          : `${error?.message}`,
+        message: getErrorMessage(error, 'Unable to remove tracker'),
       };
     }
   };
