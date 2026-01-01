@@ -86,12 +86,9 @@ namedRouter.get("admin.user.listing", '/user/listing', userController.list);
 namedRouter.post("user.getall", '/user/getall', async (req, res) => {
     try {
         const success = await userController.getAllUser(req, res);
-        res.send({
-            "meta": success.meta,
-            "data": success.data
-        });
+        res.send(success.data);
     } catch (error) {
-        res.status(error.status).send(error);
+        res.status(error.status || 500).send({ message: error.message || 'Unable to fetch users.' });
     }
 });
 

@@ -283,8 +283,9 @@ class UserController {
     */
   async getAllUser(req, res) {
     try {
-      let start = parseInt(req.body.start);
-      let length = parseInt(req.body.length);
+      let start = parseInt(req.body.start || 0);
+      let length = parseInt(req.body.length || 10);
+      let draw = parseInt(req.body.draw || 0);
       let currentPage = 1;
       if (start > 0) {
         currentPage = parseInt((start + length) / length);
@@ -293,6 +294,7 @@ class UserController {
       req.body.role = "user";
       let user = await userRepo.getAllUsers(req);
       let data = {
+        draw: draw,
         recordsTotal: user.total,
         recordsFiltered: user.total,
         data: user.docs,
