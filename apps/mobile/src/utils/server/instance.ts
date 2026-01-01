@@ -69,6 +69,11 @@ instance.interceptors.request.use(async config => {
 
   if (token && config.headers) {
     config.headers['x-access-token'] = token;
+    // Backend JWT strategy expects the token header to be named "token"
+    // (see middleware extraction with ExtractJwt.fromHeader('token')).
+    // Adding both headers keeps compatibility with any consumers relying on
+    // the previous header name while ensuring authenticated API requests work.
+    config.headers.token = token;
     // config.headers.Authorization = `Bearer ${token}`;
   }
 
