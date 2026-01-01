@@ -73,6 +73,12 @@
                     <span class="menu-item text-truncate" data-i18n="Deal Form">Deal Management</span>
                 </a>
             </li>
+            <li class="<%=(page_name == 'collection-management') ? 'active' : ''%> nav-item">
+                <a class="d-flex align-items-center" href="<%= generateUrl('admin.collection.listing') %>">
+                    <i data-feather="grid"></i>
+                    <span class="menu-item text-truncate" data-i18n="Collections">Collections</span>
+                </a>
+            </li>
             <li class="<%=(page_name == 'post-deal') ? 'active' : ''%> nav-item">
                 <a class="d-flex align-items-center" href="<%= generateUrl('deal.post.form') %>">
                     <i data-feather="external-link"></i>
