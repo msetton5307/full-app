@@ -43,7 +43,7 @@ export const TabNavigationScreen: TabNavigationScreenInterface[] = [
   {
     name: 'Flights',
     component: Flights,
-    Icon: Icons.favorite,
+    Icon: null,
     title: 'Flights',
   },
   {
