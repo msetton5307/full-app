@@ -15,7 +15,7 @@ const TabNav = () => {
   const styles = customStyles(keyboardVisible);
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Deals"
       screenOptions={{
         tabBarShowLabel: false,
         headerShown: false,
