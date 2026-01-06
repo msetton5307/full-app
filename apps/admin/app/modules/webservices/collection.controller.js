@@ -8,7 +8,14 @@ const CollectionRepo = require('../collection/repositories/collection.repository
 const DealRepo = require('../deal/repositories/deal.repository');
 
 class CollectionControllerApi {
-  constructor() {}
+  /**
+   * Ensure controller methods are bound to the instance so `this` remains
+   * available when used as route handlers.
+   */
+  constructor() {
+    this.listing = this.listing.bind(this);
+    this.deals = this.deals.bind(this);
+  }
 
   buildCoverImageUrl(req, filename) {
     if (!filename) {
