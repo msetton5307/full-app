@@ -199,7 +199,7 @@ const getCollections = () => {
       const { status, data } = result;
 
       return {
-        success: status === 200 && data?.status === 200,
+        success: status === 200,
         message: data?.message,
         data: data?.data,
       };
