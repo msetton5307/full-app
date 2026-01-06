@@ -12,11 +12,15 @@ const SYSAVINGS_API_BASE_URL = 'https://api.sysavings.com';
 
 class CollectionController {
   constructor() {
+    this.list = this.list.bind(this);
+    this.getAll = this.getAll.bind(this);
     this.getDealsForDropdown = this.getDealsForDropdown.bind(this);
     this.fetchDealsFromApi = this.fetchDealsFromApi.bind(this);
     this.normalizeApiDeal = this.normalizeApiDeal.bind(this);
     this.renderAddCollectionPage = this.renderAddCollectionPage.bind(this);
     this.renderEditpage = this.renderEditpage.bind(this);
+    this.insert = this.insert.bind(this);
+    this.update = this.update.bind(this);
     this.normalizeDealIds = this.normalizeDealIds.bind(this);
   }
 
