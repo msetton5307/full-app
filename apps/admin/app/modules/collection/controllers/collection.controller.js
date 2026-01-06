@@ -273,22 +273,27 @@ class CollectionController {
         const parsed = JSON.parse(normalizedDeals);
         normalizedDeals = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
       } catch (error) {
-        normalizedDeals = normalizedDeals.split(',').map((id) => id.trim()).filter(Boolean);
+        normalizedDeals = normalizedDeals
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean);
       }
     } else if (!Array.isArray(normalizedDeals)) {
       normalizedDeals = normalizedDeals ? [normalizedDeals] : [];
     }
 
-    const objectIds = normalizedDeals
-      .filter((id) => mongoose.isValidObjectId(id))
-      .map((id) => new mongoose.Types.ObjectId(id));
+    const castDeals = normalizedDeals
+      .map((id) => (id && id._id ? id._id : id))
+      .map((id) => (typeof id === 'string' ? id.trim() : id))
+      .filter(Boolean)
+      .map((id) => (mongoose.isValidObjectId(id) ? new mongoose.Types.ObjectId(id) : id));
 
     this.logDealProcessing('normalizeDealIds', {
       rawDealsInput: deals,
-      normalizedDeals: objectIds,
+      normalizedDeals: castDeals,
     });
 
-    return objectIds;
+    return castDeals;
   }
 
   logDealProcessing(action, details = {}) {
