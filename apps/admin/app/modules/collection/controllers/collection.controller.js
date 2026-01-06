@@ -101,9 +101,24 @@ class CollectionController {
         req.body.coverImage = req.files[0].filename;
       }
 
+      const rawDealsInput = req.body.deals;
       req.body.deals = this.normalizeDealIds(req.body.deals);
+      this.logDealProcessing('insert - deals normalized', {
+        title: req.body.title,
+        rawDealsInput,
+        normalizedDeals: req.body.deals,
+      });
 
       const save = await CollectionRepo.save(req.body);
+      this.logDealProcessing('insert - repository save result', {
+        title: req.body.title,
+        rawDealsInput,
+        normalizedDeals: req.body.deals,
+        savedCollection: {
+          id: save?._id?.toString(),
+          deals: Array.isArray(save?.deals) ? save.deals.map((id) => id.toString()) : save?.deals,
+        },
+      });
       if (!_.isEmpty(save) && save._id) {
         req.flash('success', 'Collection added successfully');
         res.redirect(namedRouter.urlFor('admin.collection.listing'));
@@ -165,7 +180,17 @@ class CollectionController {
         return res.redirect(namedRouter.urlFor('admin.collection.listing'));
       }
 
+      const rawDealsInput = req.body.deals;
       req.body.deals = this.normalizeDealIds(req.body.deals);
+      this.logDealProcessing('update - deals normalized', {
+        collectionId,
+        title: req.body.title,
+        rawDealsInput,
+        normalizedDeals: req.body.deals,
+        existingDeals: Array.isArray(collection?.deals)
+          ? collection.deals.map((id) => id.toString())
+          : collection?.deals,
+      });
 
       if (req.files && req.files.length > 0) {
         const newImage = req.files[0].filename;
@@ -179,6 +204,18 @@ class CollectionController {
       }
 
       const updateData = await CollectionRepo.updateById(req.body, collectionId);
+      this.logDealProcessing('update - repository update result', {
+        collectionId,
+        title: req.body.title,
+        rawDealsInput,
+        normalizedDeals: req.body.deals,
+        updatedCollection: {
+          id: updateData?._id?.toString(),
+          deals: Array.isArray(updateData?.deals)
+            ? updateData.deals.map((id) => id.toString())
+            : updateData?.deals,
+        },
+      });
       if (!_.isEmpty(updateData) && updateData._id) {
         req.flash('success', 'Collection updated successfully');
         res.redirect(namedRouter.urlFor('admin.collection.listing'));
@@ -242,9 +279,33 @@ class CollectionController {
       normalizedDeals = normalizedDeals ? [normalizedDeals] : [];
     }
 
-    return normalizedDeals
+    const objectIds = normalizedDeals
       .filter((id) => mongoose.isValidObjectId(id))
       .map((id) => new mongoose.Types.ObjectId(id));
+
+    this.logDealProcessing('normalizeDealIds', {
+      rawDealsInput: deals,
+      normalizedDeals: objectIds,
+    });
+
+    return objectIds;
+  }
+
+  logDealProcessing(action, details = {}) {
+    const stringifyIds = (ids) => {
+      if (!Array.isArray(ids)) {
+        return ids;
+      }
+      return ids.map((id) => (typeof id === 'string' ? id : id?.toString ? id.toString() : id));
+    };
+
+    const formattedDetails = {
+      ...details,
+      normalizedDeals: stringifyIds(details.normalizedDeals),
+      rawDealsInput: details.rawDealsInput,
+    };
+
+    console.log(`[CollectionController] ${action}`, formattedDetails);
   }
 
   async statusChange(req, res) {
