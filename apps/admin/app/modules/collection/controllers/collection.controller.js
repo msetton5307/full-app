@@ -17,6 +17,7 @@ class CollectionController {
     this.normalizeApiDeal = this.normalizeApiDeal.bind(this);
     this.renderAddCollectionPage = this.renderAddCollectionPage.bind(this);
     this.renderEditpage = this.renderEditpage.bind(this);
+    this.normalizeDealIds = this.normalizeDealIds.bind(this);
   }
 
   async list(req, res) {
@@ -96,13 +97,7 @@ class CollectionController {
         req.body.coverImage = req.files[0].filename;
       }
 
-      let deals = req.body.deals || [];
-      if (!Array.isArray(deals)) {
-        deals = deals ? [deals] : [];
-      }
-      req.body.deals = deals
-        .filter((id) => mongoose.isValidObjectId(id))
-        .map((id) => new mongoose.Types.ObjectId(id));
+      req.body.deals = this.normalizeDealIds(req.body.deals);
 
       const save = await CollectionRepo.save(req.body);
       if (!_.isEmpty(save) && save._id) {
@@ -166,13 +161,7 @@ class CollectionController {
         return res.redirect(namedRouter.urlFor('admin.collection.listing'));
       }
 
-      let deals = req.body.deals || [];
-      if (!Array.isArray(deals)) {
-        deals = deals ? [deals] : [];
-      }
-      req.body.deals = deals
-        .filter((id) => mongoose.isValidObjectId(id))
-        .map((id) => new mongoose.Types.ObjectId(id));
+      req.body.deals = this.normalizeDealIds(req.body.deals);
 
       if (req.files && req.files.length > 0) {
         const newImage = req.files[0].filename;
@@ -233,6 +222,25 @@ class CollectionController {
       _id: item._id || item.id || item.Id || item.ID || `${index}`,
       deal_title: item.Name || item.title || item.deal_title || 'Untitled Deal',
     };
+  }
+
+  normalizeDealIds(deals) {
+    let normalizedDeals = deals || [];
+
+    if (typeof normalizedDeals === 'string') {
+      try {
+        const parsed = JSON.parse(normalizedDeals);
+        normalizedDeals = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+      } catch (error) {
+        normalizedDeals = normalizedDeals.split(',').map((id) => id.trim()).filter(Boolean);
+      }
+    } else if (!Array.isArray(normalizedDeals)) {
+      normalizedDeals = normalizedDeals ? [normalizedDeals] : [];
+    }
+
+    return normalizedDeals
+      .filter((id) => mongoose.isValidObjectId(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
   }
 
   async statusChange(req, res) {
