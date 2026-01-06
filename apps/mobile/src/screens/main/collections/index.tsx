@@ -55,6 +55,21 @@ const Collections = () => {
     [navigation, resolveCoverImage],
   );
 
+  const prefetchCollectionImages = useCallback(
+    async (items: CollectionType[]) => {
+      const urls = items
+        .map(resolveCoverImage)
+        .filter(uri => typeof uri === 'string' && uri.length > 0);
+
+      try {
+        await Promise.all(urls.map(uri => Image.prefetch(uri)));
+      } catch (error) {
+        // Ignore individual image prefetch failures so they don't block rendering.
+      }
+    },
+    [resolveCoverImage],
+  );
+
   const loadCollections = useCallback(async () => {
     setIsLoadingCollections(true);
     try {
@@ -62,13 +77,14 @@ const Collections = () => {
       if (response.success) {
         const serverCollections: CollectionType[] = response.data || [];
         setCollections(serverCollections);
+        prefetchCollectionImages(serverCollections);
       } else {
         setCollections([]);
       }
     } finally {
       setIsLoadingCollections(false);
     }
-  }, [dispatch]);
+  }, [dispatch, prefetchCollectionImages]);
 
   useEffect(() => {
     loadCollections();
@@ -82,7 +98,7 @@ const Collections = () => {
           style={style.collectionCard}
           onPress={() => handleSelectCollection(item)}>
           <Image
-            source={{uri: resolveCoverImage(item)}}
+            source={{uri: resolveCoverImage(item), cache: 'force-cache'}}
             style={style.collectionImage}
             resizeMode="cover"
           />

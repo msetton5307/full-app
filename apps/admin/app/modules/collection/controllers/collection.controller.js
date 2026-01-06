@@ -200,6 +200,11 @@ class CollectionController {
   }
 
   async getDealsForDropdown(limit = 1000) {
+    const localDeals = await DealRepo.getAllByField({ isDeleted: false, status: 'Approved' });
+    if (localDeals.length) {
+      return localDeals;
+    }
+
     try {
       const apiDeals = await this.fetchDealsFromApi(limit);
       if (apiDeals.length) {
