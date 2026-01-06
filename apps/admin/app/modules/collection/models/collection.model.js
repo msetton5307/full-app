@@ -9,7 +9,10 @@ const CollectionSchema = new Schema(
     title: { type: String, required: true, default: '' },
     description: { type: String, default: '' },
     coverImage: { type: String, default: '' },
-    deals: [{ type: Schema.Types.ObjectId, ref: 'deal' }],
+    // Store references to deals. Some collections may reference external deals
+    // that do not exist in the local database, so we allow mixed types here
+    // instead of restricting to ObjectId only.
+    deals: [{ type: Schema.Types.Mixed, ref: 'deal' }],
     status: { type: String, default: 'Active', enum: statusEnum },
     isDeleted: { type: Boolean, default: false, enum: [true, false] },
   },

@@ -60,8 +60,10 @@ class CollectionControllerApi {
         return requestHandler.throwError(404, 'Collection not found')();
       }
 
+      const dealIds = (collection.deals || []).filter((id) => mongoose.isValidObjectId(id));
+
       const deals = await DealRepo.getAllByField({
-        _id: { $in: collection.deals || [] },
+        _id: { $in: dealIds },
         isDeleted: false,
         status: 'Approved',
       });
