@@ -2,7 +2,7 @@ import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 import { instance } from '../server/instance';
 import { API, API_BASE_URL, DEALS_BASE_URL } from '../constants';
-import { getPersistentSessionId, getPersistentUserId } from '../helper/userIdentity';
+import { getLoggedInUserMongoId, getPersistentSessionId, getPersistentUserId } from '../helper/userIdentity';
 import { createFrom } from '../helper/Validation';
 import { setUserInfo } from '../../redux/slice/user.slice';
 import {
@@ -33,6 +33,12 @@ const dealInteractionsBaseConfig = dealsBaseConfig;
 const withUserIdentity = <T extends { userId?: string }>(payload: T) => ({
   ...payload,
   userId: payload.userId || getPersistentUserId(),
+  sessionId: getPersistentSessionId(),
+});
+
+const withDealInteractionIdentity = <T extends { userId?: string }>(payload: T) => ({
+  ...payload,
+  userId: payload.userId || getLoggedInUserMongoId(),
   sessionId: getPersistentSessionId(),
 });
 
@@ -406,7 +412,7 @@ const applyDealLiked = (payload: DEAL_LIKE_TYPE) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealLike,
-        withUserIdentity(payload),
+        withDealInteractionIdentity(payload),
         dealInteractionsBaseConfig,
       );
 
@@ -433,7 +439,7 @@ const applyDealFavorite = (payload: { dealId: string; company: string }) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealFavorite,
-        withUserIdentity(payload),
+        withDealInteractionIdentity(payload),
         dealInteractionsBaseConfig,
       );
 
@@ -461,7 +467,7 @@ const trackDealView = (payload: { dealId: string; company: string }) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealView,
-        withUserIdentity(payload),
+        withDealInteractionIdentity(payload),
         dealInteractionsBaseConfig,
       );
 
@@ -487,7 +493,7 @@ const trackDealCtaClick = (payload: { dealId: string; company: string; url?: str
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.dealCtaClick,
-        withUserIdentity(payload),
+        withDealInteractionIdentity(payload),
         dealInteractionsBaseConfig,
       );
 
@@ -513,7 +519,7 @@ const reportDealExpired = (payload: { dealId: string; company: string; reason?: 
     try {
       const result: AxiosResponse<any> = await instance.post(
         listing.reportExpired,
-        withUserIdentity({
+        withDealInteractionIdentity({
           ...payload,
           reason: payload.reason || 'User reported this deal as expired.',
         }),
