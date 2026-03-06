@@ -49,3 +49,10 @@ export const getPersistentSessionId = (): string => {
 
   return generatedSessionId;
 };
+
+export const getLoggedInUserMongoId = (): string | undefined => {
+  const state = store.getState();
+  const loggedInUserId = state.user.userInfo?._id;
+
+  return loggedInUserId ? String(loggedInUserId) : undefined;
+};
