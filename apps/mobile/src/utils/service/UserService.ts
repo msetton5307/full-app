@@ -2,7 +2,7 @@ import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 import { instance } from '../server/instance';
 import { API, API_BASE_URL, DEALS_BASE_URL } from '../constants';
-import { getPersistentUserId } from '../helper/userIdentity';
+import { getPersistentSessionId, getPersistentUserId } from '../helper/userIdentity';
 import { createFrom } from '../helper/Validation';
 import { setUserInfo } from '../../redux/slice/user.slice';
 import {
@@ -33,6 +33,7 @@ const dealInteractionsBaseConfig = dealsBaseConfig;
 const withUserIdentity = <T extends { userId?: string }>(payload: T) => ({
   ...payload,
   userId: payload.userId || getPersistentUserId(),
+  sessionId: getPersistentSessionId(),
 });
 
 const getUserDetails = () => {
@@ -427,7 +428,7 @@ const applyDealLiked = (payload: DEAL_LIKE_TYPE) => {
   };
 };
 
-const applyDealFavorite = (payload: { dealId: string }) => {
+const applyDealFavorite = (payload: { dealId: string; company: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
@@ -455,7 +456,7 @@ const applyDealFavorite = (payload: { dealId: string }) => {
   };
 };
 
-const trackDealView = (payload: { dealId: string }) => {
+const trackDealView = (payload: { dealId: string; company: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
@@ -481,7 +482,7 @@ const trackDealView = (payload: { dealId: string }) => {
   };
 };
 
-const trackDealCtaClick = (payload: { dealId: string; url?: string }) => {
+const trackDealCtaClick = (payload: { dealId: string; company: string; url?: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(
@@ -507,7 +508,7 @@ const trackDealCtaClick = (payload: { dealId: string; url?: string }) => {
   };
 };
 
-const reportDealExpired = (payload: { dealId: string; reason?: string }) => {
+const reportDealExpired = (payload: { dealId: string; company: string; reason?: string }) => {
   return async (dispatch: Dispatch) => {
     try {
       const result: AxiosResponse<any> = await instance.post(

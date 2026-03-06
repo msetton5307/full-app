@@ -167,6 +167,7 @@ export interface DEAL_LIKE_TYPE {
   isLike: boolean;
   isDisLike: boolean;
   dealId: string;
+  company: string;
   userId?: string;
 }
 
