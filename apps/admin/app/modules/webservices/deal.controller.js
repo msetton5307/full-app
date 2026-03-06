@@ -21,6 +21,17 @@ const SYSAVINGS_API_BASE_URL = 'https://api.sysavings.com';
 // response helper
 
 class DealControllerApi {
+    validateDealInteractionPayload(payload = {}) {
+        const requiredFields = ['dealId', 'userId', 'company', 'sessionId'];
+        const missingFields = requiredFields.filter((field) => !payload[field]);
+
+        if (!missingFields.length) {
+            return null;
+        }
+
+        return `Missing required field(s): ${missingFields.join(', ')}`;
+    }
+
     getUserId(req) {
         return req.body?.userId || req.query?.userId || req.user?._id || null;
     }
@@ -59,16 +70,18 @@ class DealControllerApi {
 
     async recordDealView(req, res) {
         try {
-            const { dealId } = req.body;
-            const userId = this.getUserId(req);
+            const { dealId, userId, company, sessionId } = req.body;
+            const validationError = this.validateDealInteractionPayload(req.body);
 
-            if (!dealId || !userId) {
-                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            if (validationError) {
+                return requestHandler.throwError(400, validationError)();
             }
 
             const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/view`, {
                 dealId,
                 userId,
+                company,
+                sessionId,
             });
 
             return requestHandler.sendSuccess(res, 'Deal view recorded')(responseData);
@@ -80,16 +93,18 @@ class DealControllerApi {
 
     async recordDealCtaClick(req, res) {
         try {
-            const { dealId, url } = req.body;
-            const userId = this.getUserId(req);
+            const { dealId, url, userId, company, sessionId } = req.body;
+            const validationError = this.validateDealInteractionPayload(req.body);
 
-            if (!dealId || !userId) {
-                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            if (validationError) {
+                return requestHandler.throwError(400, validationError)();
             }
 
             const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/cta-click`, {
                 dealId,
                 userId,
+                company,
+                sessionId,
                 url: url || '',
             });
 
@@ -102,16 +117,18 @@ class DealControllerApi {
 
     async reportExpiredDeal(req, res) {
         try {
-            const { dealId, reason } = req.body;
-            const userId = this.getUserId(req);
+            const { dealId, reason, userId, company, sessionId } = req.body;
+            const validationError = this.validateDealInteractionPayload(req.body);
 
-            if (!dealId || !userId) {
-                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            if (validationError) {
+                return requestHandler.throwError(400, validationError)();
             }
 
             const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/report-expired`, {
                 dealId,
                 userId,
+                company,
+                sessionId,
                 reason: reason || '',
             });
 
@@ -125,16 +142,18 @@ class DealControllerApi {
 
     async likeDeal(req, res) {
         try {
-            const { dealId } = req.body;
-            const userId = this.getUserId(req);
+            const { dealId, userId, company, sessionId } = req.body;
+            const validationError = this.validateDealInteractionPayload(req.body);
 
-            if (!dealId || !userId) {
-                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            if (validationError) {
+                return requestHandler.throwError(400, validationError)();
             }
 
             const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/like`, {
                 dealId,
                 userId,
+                company,
+                sessionId,
             });
 
             return requestHandler.sendSuccess(res, 'Like updated successfully')(responseData);
@@ -146,16 +165,18 @@ class DealControllerApi {
 
     async favoriteDeal(req, res) {
         try {
-            const { dealId } = req.body;
-            const userId = this.getUserId(req);
+            const { dealId, userId, company, sessionId } = req.body;
+            const validationError = this.validateDealInteractionPayload(req.body);
 
-            if (!dealId || !userId) {
-                return requestHandler.throwError(400, 'Deal id and user id are required')();
+            if (validationError) {
+                return requestHandler.throwError(400, validationError)();
             }
 
             const { data: responseData } = await axios.post(`${SYSAVINGS_API_BASE_URL}/api/deal/favorite`, {
                 dealId,
                 userId,
+                company,
+                sessionId,
             });
 
             return requestHandler.sendSuccess(res, 'Favorite updated successfully')(responseData);

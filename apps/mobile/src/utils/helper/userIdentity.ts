@@ -2,6 +2,7 @@ import {store} from '@app/redux';
 import Storage from '../storage';
 
 const USER_ID_KEY = 'user_id';
+const SESSION_ID_KEY = 'session_id';
 
 const generateLocalUserId = () => {
   const uuid = globalThis?.crypto?.randomUUID?.();
@@ -36,3 +37,15 @@ export const getPersistentUserId = (): string => {
   return generatedId;
 };
 
+export const getPersistentSessionId = (): string => {
+  const storedSessionId = Storage.getItem(SESSION_ID_KEY);
+
+  if (storedSessionId) {
+    return storedSessionId;
+  }
+
+  const generatedSessionId = generateLocalUserId();
+  Storage.setItem(SESSION_ID_KEY, generatedSessionId);
+
+  return generatedSessionId;
+};

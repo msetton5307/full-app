@@ -170,6 +170,12 @@ const ProductCard = ({
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isReportingExpired, setIsReportingExpired] = useState<boolean>(false);
 
+  const getDealCompany = useCallback(
+    (dealData?: any) =>
+      dealData?.company_name || dealData?.Company || item?.company_name || item?.Company || '',
+    [item?.Company, item?.company_name],
+  );
+
   const currentDealId = useMemo(
     () =>
       productDetails?._id ||
@@ -202,13 +208,13 @@ const ProductCard = ({
   );
 
   const recordDealView = useCallback(
-    async (dealId: string) => {
+    async (dealId: string, company: string) => {
       if (!dealId) {
         return;
       }
 
       try {
-        await dispatch(trackDealView({dealId}));
+        await dispatch(trackDealView({dealId, company}));
       } catch (error) {
         console.log('Error recording deal view', error);
       }
@@ -217,13 +223,13 @@ const ProductCard = ({
   );
 
   const recordDealCtaClick = useCallback(
-    async (dealId: string, url?: string) => {
+    async (dealId: string, company: string, url?: string) => {
       if (!dealId) {
         return;
       }
 
       try {
-        await dispatch(trackDealCtaClick({dealId, url}));
+        await dispatch(trackDealCtaClick({dealId, company, url}));
       } catch (error) {
         console.log('Error recording deal CTA click', error);
       }
@@ -258,7 +264,7 @@ const ProductCard = ({
           source: jsonData ? 'json_listing' : 'deal_listing',
         });
 
-        recordDealView(dealId);
+        recordDealView(dealId, getDealCompany(item));
       } else {
         try {
           const result = await dispatch(
@@ -296,14 +302,22 @@ const ProductCard = ({
               isJson: false,
             });
 
-            recordDealView(dealId);
+            recordDealView(dealId, getDealCompany(result.data));
           }
         } catch (error) {
           console.log('Error', error);
         }
       }
     },
-    [dispatch, jsonData, item, onModalOpen, recordDealView, trackDealEvent],
+    [
+      dispatch,
+      getDealCompany,
+      jsonData,
+      item,
+      onModalOpen,
+      recordDealView,
+      trackDealEvent,
+    ],
   );
 
   useEffect(() => {
@@ -323,6 +337,7 @@ const ProductCard = ({
         const result = await dispatch(
           applyDealLiked({
             dealId: id,
+            company: getDealCompany(productDetails),
             isDisLike: action === 'dislike' ? !currentState : false,
             isLike: action === 'like' ? !currentState : false,
           }),
@@ -341,7 +356,7 @@ const ProductCard = ({
         console.log(`Error handling ${action}`, error);
       }
     },
-    [dispatch, trackDealEvent],
+    [dispatch, getDealCompany, productDetails, trackDealEvent],
   );
 
   const copyToClipboard = (link: string) => {
@@ -356,7 +371,7 @@ const ProductCard = ({
       trackDealEvent('deal_link_clicked', {
         link,
       });
-      recordDealCtaClick(currentDealId, link);
+      recordDealCtaClick(currentDealId, getDealCompany(productDetails), link);
       Linking.openURL(link).catch(err =>
         console.error('Error opening link:', err),
       );
@@ -371,7 +386,9 @@ const ProductCard = ({
       }
 
       try {
-        const result = await dispatch(applyDealFavorite({dealId: id}));
+        const result = await dispatch(
+          applyDealFavorite({dealId: id, company: getDealCompany(productDetails)}),
+        );
         if (result.success) {
           trackDealEvent('deal_favourite', {
             value: !isFavourite,
@@ -385,7 +402,7 @@ const ProductCard = ({
         console.log('Error handling favourite', error);
       }
     },
-    [dispatch, trackDealEvent],
+    [dispatch, getDealCompany, productDetails, trackDealEvent],
   );
 
   const handleReportExpired = useCallback(async () => {
@@ -399,6 +416,7 @@ const ProductCard = ({
       const response = await dispatch(
         reportDealExpired({
           dealId: currentDealId,
+          company: getDealCompany(productDetails),
           reason: 'User reported this deal from the app.',
         }),
       );
@@ -414,7 +432,7 @@ const ProductCard = ({
     } finally {
       setIsReportingExpired(false);
     }
-  }, [currentDealId, dispatch, trackDealEvent]);
+  }, [currentDealId, dispatch, getDealCompany, productDetails, trackDealEvent]);
 
   const share = async (data: ViewProductDetails) => {
     try {
